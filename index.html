@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>私域增长闭环实战营 - 30天打造店铺自动化获客系统</title>
+    <meta name="description" content="30天手把手教你搭建实体店私域增长系统，获客成本降低70%，老客复购率提升30%，已帮助500+实体店老板实现持续增长">
+    <meta name="keywords" content="私域流量,实体店增长,客户获取,社群运营,复购率,营销自动化">
+    <meta name="author" content="增长陪跑教练">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://growth-coach.com/">
+    <meta property="og:title" content="私域增长闭环实战营 - 30天打造店铺自动化获客系统">
+    <meta property="og:description" content="30天手把手教你搭建实体店私域增长系统，获客成本降低70%，老客复购率提升30%">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://growth-coach.com/">
+    <meta property="twitter:title" content="私域增长闭环实战营">
+    <meta property="twitter:description" content="30天手把手教你搭建实体店私域增长系统">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0idXJsKCNncmFkaWVudDApIi8+CjxwYXRoIGQ9Ik04IDE2SDI0TTE2IDhWMjQiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MCIgeDE9IjAiIHkxPSIwIiB4Mj0iMzIiIHkyPSIzMiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMDA4OGZmIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwNzBmMyIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography,forms,aspect-ratio"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="data_manager.js"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
+                        'display': ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand': {
+                            50: '#f0f7ff',
+                            100: '#e0efff',
+                            200: '#b9ddff',
+                            300: '#7bc3ff',
+                            400: '#36a5ff',
+                            500: '#0088ff',
+                            600: '#0070f3',
+                            700: '#0056d9',
+                            800: '#0048b3',
+                            900: '#003d96',
+                        },
+                        'neutral': {
+                            50: '#fafafa',
+                            100: '#f5f5f5',
+                            200: '#e5e5e5',
+                            300: '#d4d4d4',
+                            400: '#a3a3a3',
+                            500: '#737373',
+                            600: '#525252',
+                            700: '#404040',
+                            800: '#262626',
+                            900: '#171717',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+                        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 25px 50px -12px rgba(0, 0, 0, 0.08)',
+                        'large': '0 10px 40px -15px rgba(0, 0, 0, 0.2), 0 25px 65px -5px rgba(0, 0, 0, 0.15)',
+                        'glow': '0 0 20px rgba(0, 136, 255, 0.4)',
+                        'glow-lg': '0 0 40px rgba(0, 136, 255, 0.3)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.8s ease-out',
+                        'slide-in': 'slideIn 0.5s ease-out',
+                        'scale-in': 'scaleIn 0.4s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideIn: {
+                            '0%': { opacity: '0', transform: 'translateX(-30px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' }
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        shimmer: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #171717;
+            background: #fafafa;
+            overflow-x: hidden;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #0088ff, #0070f3);
+            z-index: 9999;
+            transition: width 0.1s ease;
+        }
+
+        /* Theme Switching */
+        [data-theme="minimal"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafafa;
+            --text-primary: #000000;
+            --text-secondary: #404040;
+            --text-muted: #666666;
+            --border-color: #d1d5db;
+            --accent-color: #0088ff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --contrast-bg: #f8fafc;
+        }
+
+        [data-theme="glass"] {
+            --bg-primary: rgba(255, 255, 255, 0.95);
+            --bg-secondary: rgba(255, 255, 255, 0.85);
+            --text-primary: #000000;
+            --text-secondary: #1a1a1a;
+            --text-muted: #333333;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --accent-color: #0088ff;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --contrast-bg: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #111111;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #e5e5e5;
+            --text-muted: #cccccc;
+            --border-color: #404040;
+            --accent-color: #36a5ff;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --card-bg: #1f1f1f;
+            --contrast-bg: #262626;
+            background: #0a0a0a;
+        }
+
+        /* Glass Morphism Effects */
+        .glass-card {
+            background: var(--bg-primary);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        .glass-nav {
+            background: var(--bg-primary);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Modern Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #0088ff, #0070f3);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 136, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px 26px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Card Styles */
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px var(--shadow-color);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 136, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        /* Enhanced Chart Container */
+        .chart-container {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--accent-color);
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1;
+        }
+
+        .chart-container.chart-loaded::before {
+            display: none;
+        }
+
+        .chart-container canvas {
+            position: relative;
+            z-index: 2;
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Typography improvements for readability */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .text-strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        /* Enhanced contrast for data display */
+        .data-highlight {
+            background: var(--contrast-bg);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            color: var(--text-primary);
+        }
+
+        .stat-number {
+            color: var(--text-primary);
+            font-weight: 900;
+            text-shadow: 0 1px 2px var(--shadow-color);
+        }
+
+        /* Enhanced blockquote styling */
+        blockquote {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Glass theme specific overrides for better contrast */
+        [data-theme="glass"] .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="glass"] .text-secondary {
+            color: var(--text-secondary);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="glass"] .text-primary {
+            color: var(--text-primary);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dark theme specific enhancements */
+        [data-theme="dark"] .feature-card {
+            background: var(--card-bg);
+            border: 1px solid #333333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .data-highlight {
+            background: var(--contrast-bg);
+            border: 1px solid #444444;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Form Styles */
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 136, 255, 0.1);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        /* Pricing Card */
+        .pricing-card {
+            background: linear-gradient(135deg, #0088ff, #0070f3);
+            border-radius: 24px;
+            padding: 48px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 4s ease-in-out infinite;
+        }
+
+        /* Utility Classes */
+        .text-gradient {
+            background: linear-gradient(135deg, #0088ff, #0070f3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-spacing {
+            padding: 120px 0;
+        }
+
+        .container-wide {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .container-narrow {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px;
+            display: flex;
+            gap: 4px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .theme-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-option.minimal { background: #ffffff; border: 2px solid #e5e5e5; }
+        .theme-option.glass { background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(0,136,255,0.1)); }
+        .theme-option.dark { background: #171717; }
+
+        .theme-option.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section-spacing {
+                padding: 80px 0;
+            }
+
+            .container-wide,
+            .container-narrow {
+                padding: 0 16px;
+            }
+
+            .modal-content {
+                padding: 24px;
+                margin: 20px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .theme-toggle {
+                top: 80px;
+                right: 16px;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Focus Styles */
+        .btn-primary:focus,
+        .btn-secondary:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Typography improvements for readability */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .text-strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body data-theme="minimal" class="transition-all duration-300">
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <button class="theme-option minimal active" data-theme="minimal" title="极简模式" aria-label="切换到极简模式"></button>
+        <button class="theme-option glass" data-theme="glass" title="玻璃模式" aria-label="切换到玻璃模式"></button>
+        <button class="theme-option dark" data-theme="dark" title="深色模式" aria-label="切换到深色模式"></button>
+    </div>
+
+    <!-- Navigation -->
+    <header class="glass-nav fixed w-full top-0 z-50 transition-all duration-300" id="header">
+        <nav class="container-wide" role="navigation" aria-label="主导航">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="#" class="flex items-center space-x-3 text-decoration-none">
+                        <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center shadow-soft">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold text-strong hidden sm:inline">增长陪跑教练</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-secondary hover:text-brand-600 transition-colors font-medium">课程特色</a>
+                    <a href="#testimonials" class="text-secondary hover:text-brand-600 transition-colors font-medium">学员案例</a>
+                    <a href="#pricing" class="text-secondary hover:text-brand-600 transition-colors font-medium">立即报名</a>
+                    <button class="btn-secondary" onclick="openModal('consultModal')">
+                        <i data-lucide="phone" class="w-4 h-4"></i>
+                        免费咨询
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuBtn" class="p-2 text-secondary hover:text-primary focus:outline-none" aria-label="打开移动菜单">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden border-t" style="border-color: var(--border-color);">
+            <div class="container-wide py-6 space-y-4">
+                <a href="#features" class="block text-secondary hover:text-brand-600 font-medium">课程特色</a>
+                <a href="#testimonials" class="block text-secondary hover:text-brand-600 font-medium">学员案例</a>
+                <a href="#pricing" class="block text-secondary hover:text-brand-600 font-medium">立即报名</a>
+                <button class="btn-secondary w-full mt-4" onclick="openModal('consultModal')">
+                    <i data-lucide="phone" class="w-4 h-4"></i>
+                    免费咨询
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20">
+        <!-- Hero Section -->
+        <section id="hero" class="section-spacing relative overflow-hidden" style="background: linear-gradient(135deg, var(--bg-secondary), rgba(0, 136, 255, 0.05));">
+            <!-- Background Elements -->
+            <div class="absolute inset-0">
+                <div class="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-brand-200/30 to-brand-400/30 rounded-full blur-3xl animate-float"></div>
+                <div class="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-brand-300/20 to-brand-500/20 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+            </div>
+
+            <div class="container-wide relative z-10">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <!-- Content -->
+                    <div class="text-center lg:text-left space-y-8">
+                        <!-- Badge -->
+                        <div class="inline-flex items-center px-4 py-2 bg-brand-50 text-brand-700 rounded-full text-sm font-medium border border-brand-200">
+                            <i data-lucide="fire" class="w-4 h-4 mr-2"></i>
+                            限时招募中，仅剩 <span class="font-bold mx-1" id="remainingSpots">12</span> 个名额
+                        </div>
+
+                        <!-- Headline -->
+                        <div class="space-y-4">
+                            <h1 class="text-5xl lg:text-6xl font-black leading-tight">
+                                告别<span class="text-gradient">烧钱获客</span>时代
+                            </h1>
+                            <h2 class="text-2xl lg:text-3xl text-strong font-semibold">
+                                30天打造实体店自动化客户增长系统
+                            </h2>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-xl leading-relaxed max-w-2xl">
+                            已帮助<span class="font-bold text-brand-600">500+</span>实体店老板实现获客成本降低<span class="font-bold text-brand-600">70%</span>，
+                            老客复购率提升<span class="font-bold text-brand-600">30%</span>的增长奇迹
+                        </p>
+
+                        <!-- CTA Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button class="btn-primary text-lg px-8 py-4" onclick="scrollToSection('pricing')">
+                                <i data-lucide="rocket" class="w-5 h-5"></i>
+                                立即开启增长之路
+                            </button>
+                            <button class="btn-secondary text-lg px-8 py-4" onclick="openModal('demoModal')">
+                                <i data-lucide="play-circle" class="w-5 h-5"></i>
+                                观看成功案例
+                            </button>
+                        </div>
+
+                        <!-- Social Proof -->
+                        <div class="flex items-center justify-center lg:justify-start space-x-8 text-sm text-secondary">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                                <span><span class="font-semibold text-strong">3,847+</span> 学员已报名</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                                <span><span class="font-semibold text-strong">4.9/5</span> 学员评分</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hero Visual -->
+                    <div class="relative">
+                        <div class="feature-card bg-white shadow-large">
+                            <div class="space-y-6">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center">
+                                        <i data-lucide="trending-up" class="w-8 h-8 text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold">获客成本降低</h3>
+                                        <p class="text-4xl font-black text-green-600">70%+</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center">
+                                        <i data-lucide="repeat" class="w-8 h-8 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold">复购率提升</h3>
+                                        <p class="text-4xl font-black text-blue-600">30%+</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center">
+                                        <i data-lucide="clock" class="w-8 h-8 text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold">时间节省</h3>
+                                        <p class="text-4xl font-black text-purple-600">80%+</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+                <i data-lucide="chevron-down" class="w-6 h-6 text-secondary"></i>
+            </div>
+        </section>
+
+        <!-- Problems Section -->
+        <section id="problems" class="section-spacing" style="background: var(--bg-primary);">
+            <div class="container-wide">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-6 text-gradient">
+                        老板，这些困境你是否也在经历？
+                    </h2>
+                    <p class="text-xl max-w-3xl mx-auto">
+                        每一个成功的转变，都始于对现状的深刻认知
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="feature-card group">
+                        <div class="flex items-start mb-6">
+                            <div class="bg-red-100 p-3 rounded-full mr-4">
+                                <i data-lucide="trending-down" class="w-8 h-8 text-red-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold mb-2">广告费用暴涨</h3>
+                                <p>投入越来越多，获客成本却节节攀升，ROI持续下降</p>
+                            </div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <p class="text-red-700 font-semibold">平均获客成本增长 <span class="text-2xl">300%</span></p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card group">
+                        <div class="flex items-start mb-6">
+                            <div class="bg-orange-100 p-3 rounded-full mr-4">
+                                <i data-lucide="users-x" class="w-8 h-8 text-orange-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold mb-2">客户流失严重</h3>
+                                <p>一次性消费占主导，客户黏性低，复购率不足15%</p>
+                            </div>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <p class="text-orange-700 font-semibold">客户生命周期价值仅为 <span class="text-2xl">1.2倍</span></p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card group">
+                        <div class="flex items-start mb-6">
+                            <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                                <i data-lucide="alert-triangle" class="w-8 h-8 text-yellow-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold mb-2">平台依赖风险</h3>
+                                <p>过度依赖第三方平台，规则变化就面临生存危机</p>
+                            </div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <p class="text-yellow-700 font-semibold">85% 流量来自平台，抗风险能力极低</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card group">
+                        <div class="flex items-start mb-6">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i data-lucide="clock" class="w-8 h-8 text-blue-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold mb-2">运营效率低下</h3>
+                                <p>缺乏系统化运营方法，人力成本高，效果难以持续</p>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-blue-700 font-semibold">运营人效仅为同行 <span class="text-2xl">40%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-16">
+                    <div class="feature-card bg-gradient-to-r from-red-500 to-purple-600 text-white max-w-4xl mx-auto">
+                        <h3 class="text-3xl font-bold mb-4">如果这些问题持续存在...</h3>
+                        <p class="text-xl mb-6">3年内，70%的实体店将因获客成本过高而面临关店危机</p>
+                        <p class="text-lg opacity-90">而那些提前布局私域的店铺，正在享受源源不断的自然流量和稳定复购</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="section-spacing" style="background: linear-gradient(135deg, var(--bg-secondary), rgba(0, 136, 255, 0.02));">
+            <div class="container-wide">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-6 text-gradient">
+                        私域增长系统：你的获客新引擎
+                    </h2>
+                    <p class="text-xl max-w-3xl mx-auto">
+                        基于500+成功案例总结的实战方法论，让你的店铺拥有持续增长的核心竞争力
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 mb-16">
+                    <div class="feature-card text-center animate-float">
+                        <div class="w-20 h-20 bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="target" class="w-10 h-10 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">精准引流获客</h3>
+                        <p class="mb-6">多渠道引流策略，建立专属流量池，获客成本降低70%</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-blue-600">70%</div>
+                            <div class="text-sm">获客成本降低</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card text-center animate-float" style="animation-delay: 0.2s;">
+                        <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="refresh-cw" class="w-10 h-10 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">自动化运营</h3>
+                        <p class="mb-6">智能化客户管理系统，解放人力，提升运营效率300%</p>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-green-600">300%</div>
+                            <div class="text-sm">运营效率提升</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card text-center animate-float" style="animation-delay: 0.4s;">
+                        <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="repeat" class="w-10 h-10 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">持续复购增长</h3>
+                        <p class="mb-6">科学化客户生命周期管理，复购率提升至50%以上</p>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-600">50%+</div>
+                            <div class="text-sm">复购率提升</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Chart -->
+                <div class="feature-card">
+                    <h3 class="text-3xl font-bold text-center mb-8 text-strong">学员店铺增长数据对比</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="chart-container">
+                            <canvas id="growthChart" width="400" height="300"></canvas>
+                            <div id="chart-fallback" class="text-center" style="display: none;">
+                                <div class="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i data-lucide="bar-chart-3" class="w-8 h-8 text-brand-600"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-strong mb-2">数据图表</h4>
+                                <p class="text-secondary">学员店铺增长趋势图</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <div class="space-y-6">
+                                <div class="data-highlight">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-lg font-semibold text-strong">月营业额增长</span>
+                                        <span class="text-3xl font-bold text-green-600 stat-number">+158%</span>
+                                    </div>
+                                </div>
+                                <div class="data-highlight">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-lg font-semibold text-strong">客户数量增长</span>
+                                        <span class="text-3xl font-bold text-blue-600 stat-number">+245%</span>
+                                    </div>
+                                </div>
+                                <div class="data-highlight">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-lg font-semibold text-strong">利润率提升</span>
+                                        <span class="text-3xl font-bold text-purple-600 stat-number">+89%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="section-spacing" style="background: var(--bg-primary);">
+            <div class="container-wide">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-6 text-gradient">
+                        真实案例，验证成果
+                    </h2>
+                    <p class="text-xl">
+                        这些不是编造的故事，而是实实在在的增长数据
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="feature-card">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
+                                李
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold">李老板</h4>
+                                <p class="text-secondary">成都火锅店</p>
+                            </div>
+                        </div>
+                        <blockquote class="mb-6 leading-relaxed text-secondary">
+                            "参加实战营前，我们90%的客源靠平台，利润薄得可怜。学完后，我们用老师教的方法，一个月加了2000多个顾客微信，现在30%的营业额都来自私域复购！"
+                        </blockquote>
+                        <div class="data-highlight bg-green-50">
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-bold text-green-600 stat-number">+200%</div>
+                                    <div class="text-sm text-muted">营业额增长</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-green-600 stat-number">2000+</div>
+                                    <div class="text-sm text-muted">私域客户</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
+                                王
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold">王女士</h4>
+                                <p class="text-secondary">杭州美甲店</p>
+                            </div>
+                        </div>
+                        <blockquote class="mb-6 leading-relaxed text-secondary">
+                            "我最怕技术和复杂的东西。但这个课程真的太'保姆级'了！从企业微信设置到朋友圈内容，都有模板。现在我也能熟练地管理客户了！"
+                        </blockquote>
+                        <div class="data-highlight bg-purple-50">
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-600 stat-number">85%</div>
+                                    <div class="text-sm text-muted">复购率</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-600 stat-number">-60%</div>
+                                    <div class="text-sm text-muted">运营成本</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="flex items-center mb-6">
+                            <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
+                                张
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold">张总</h4>
+                                <p class="text-secondary">连锁水果店</p>
+                            </div>
+                        </div>
+                        <blockquote class="mb-6 leading-relaxed text-secondary">
+                            "2999元花得太值了！不仅学到了系统方法，更重要的是进入了高质量圈子。群里每天都有老板分享经验，这种价值远超课程本身。"
+                        </blockquote>
+                        <div class="data-highlight bg-blue-50">
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-bold text-blue-600 stat-number">150%</div>
+                                    <div class="text-sm text-muted">利润增长</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-blue-600 stat-number">5家</div>
+                                    <div class="text-sm text-muted">新开门店</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-16 feature-card">
+                    <h3 class="text-3xl font-bold text-center mb-8 text-strong">学员增长数据一览</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-gradient mb-2 stat-number">500+</div>
+                            <div class="text-secondary">成功学员</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-gradient mb-2 stat-number">158%</div>
+                            <div class="text-secondary">平均营业额增长</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-gradient mb-2 stat-number">70%</div>
+                            <div class="text-secondary">获客成本降低</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-gradient mb-2 stat-number">50%+</div>
+                            <div class="text-secondary">复购率提升</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section-spacing" style="background: linear-gradient(135deg, var(--bg-secondary), rgba(0, 136, 255, 0.05));">
+            <div class="container-narrow">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-6 text-gradient">
+                        投资未来，收获持续增长
+                    </h2>
+                    <p class="text-xl">
+                        一次投资，终身受益的增长系统
+                    </p>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="relative z-10">
+                        <h3 class="text-3xl font-bold mb-6">私域增长闭环实战营</h3>
+
+                        <div class="mb-8">
+                            <div class="text-lg opacity-80 mb-2 line-through">原价 ¥4,999</div>
+                            <div class="text-6xl font-black mb-2">¥2,999</div>
+                            <div class="text-lg opacity-80">仅相当于一个月广告费的1/10</div>
+                        </div>
+
+                        <!-- Countdown -->
+                        <div class="mb-8">
+                            <h4 class="text-2xl font-bold mb-4">🔥 限时优惠倒计时 🔥</h4>
+                            <div class="flex gap-4 justify-center flex-wrap" id="countdown">
+                                <div class="bg-white/20 rounded-lg p-4 text-center min-w-[80px] backdrop-blur-sm">
+                                    <div class="text-2xl font-bold" id="days">07</div>
+                                    <div class="text-sm">天</div>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-4 text-center min-w-[80px] backdrop-blur-sm">
+                                    <div class="text-2xl font-bold" id="hours">23</div>
+                                    <div class="text-sm">时</div>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-4 text-center min-w-[80px] backdrop-blur-sm">
+                                    <div class="text-2xl font-bold" id="minutes">59</div>
+                                    <div class="text-sm">分</div>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-4 text-center min-w-[80px] backdrop-blur-sm">
+                                    <div class="text-2xl font-bold" id="seconds">30</div>
+                                    <div class="text-sm">秒</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-8 text-left">
+                            <div class="bg-white/20 p-4 rounded-lg flex items-center backdrop-blur-sm">
+                                <i data-lucide="video" class="w-6 h-6 mr-3 flex-shrink-0"></i>
+                                <span>6大模块直播授课</span>
+                            </div>
+                            <div class="bg-white/20 p-4 rounded-lg flex items-center backdrop-blur-sm">
+                                <i data-lucide="folder" class="w-6 h-6 mr-3 flex-shrink-0"></i>
+                                <span>全套模板工具包</span>
+                            </div>
+                            <div class="bg-white/20 p-4 rounded-lg flex items-center backdrop-blur-sm">
+                                <i data-lucide="user-check" class="w-6 h-6 mr-3 flex-shrink-0"></i>
+                                <span>1对1作业点评</span>
+                            </div>
+                            <div class="bg-white/20 p-4 rounded-lg flex items-center backdrop-blur-sm">
+                                <i data-lucide="users" class="w-6 h-6 mr-3 flex-shrink-0"></i>
+                                <span>专属学员社群</span>
+                            </div>
+                        </div>
+
+                        <!-- Special Offer -->
+                        <div class="bg-yellow-400 text-yellow-900 p-6 rounded-xl mb-8">
+                            <h4 class="text-2xl font-bold mb-4">前20名专享福利</h4>
+                            <div class="space-y-2 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <i data-lucide="gift" class="w-5 h-5"></i>
+                                    <span>立减 ¥300，到手价 <strong>¥2,699</strong></span>
+                                </div>
+                                <div class="flex items-center justify-center gap-2">
+                                    <i data-lucide="star" class="w-5 h-5"></i>
+                                    <span>赠送价值¥999的1对1店铺诊断</span>
+                                </div>
+                                <div class="flex items-center justify-center gap-2">
+                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                    <span>免费获得抖音同城获客课程</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CTA Buttons -->
+                        <div class="space-y-4">
+                            <button class="w-full bg-yellow-400 hover:bg-yellow-300 text-yellow-900 text-2xl py-4 rounded-xl font-black transition-all duration-300 transform hover:scale-105" onclick="openModal('enrollModal')">
+                                <i data-lucide="rocket" class="w-6 h-6 mr-2 inline"></i>
+                                立即锁定名额，开启增长之路
+                            </button>
+                            <button class="w-full bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 py-3 rounded-xl font-bold transition-all duration-300" onclick="openModal('consultModal')">
+                                <i data-lucide="phone" class="w-6 h-6 mr-2 inline"></i>
+                                先咨询再决定
+                            </button>
+                        </div>
+
+                        <div class="mt-8 text-sm opacity-80">
+                            <p>💡 30天无效果退款保证</p>
+                            <p>🔒 仅限50个名额，报满即止</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guarantee -->
+                <div class="mt-16 feature-card">
+                    <h3 class="text-3xl font-bold text-center mb-8">零风险保障</h3>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="bg-green-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">30天效果保证</h4>
+                            <p class="text-secondary">按要求完成作业，30天内无效果即可申请退款</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="headphones" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">终身服务支持</h4>
+                            <p class="text-secondary">加入学员群，享受持续的问题解答和经验分享</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-purple-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="trending-up" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">持续课程更新</h4>
+                            <p class="text-secondary">随着市场变化，免费获得课程内容和工具更新</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12" style="background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+        <div class="container-wide">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold text-strong">增长陪跑教练</span>
+                    </div>
+                    <p class="text-secondary">专注实体店私域增长，已帮助500+店铺实现持续增长</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-strong">联系我们</h4>
+                    <div class="space-y-2 text-secondary">
+                        <p>微信：growth-coach</p>
+                        <p>电话：400-888-8888</p>
+                        <p>邮箱：contact@growth.com</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-strong">服务内容</h4>
+                    <div class="space-y-2 text-secondary">
+                        <p>私域增长培训</p>
+                        <p>店铺增长诊断</p>
+                        <p>一对一增长咨询</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-strong">关注我们</h4>
+                    <div class="flex space-x-4">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer transition-colors" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
+                            <i data-lucide="youtube" class="w-5 h-5 text-secondary"></i>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer transition-colors" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
+                            <i data-lucide="twitter" class="w-5 h-5 text-secondary"></i>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer transition-colors" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
+                            <i data-lucide="linkedin" class="w-5 h-5 text-secondary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 text-center text-secondary" style="border-top: 1px solid var(--border-color);">
+                <p>&copy; 2025 实体店增长陪跑教练. All Rights Reserved.</p>
+                <p class="mt-2">赋能实体，重塑增长</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Consultation Modal -->
+    <div id="consultModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-strong">免费增长咨询</h3>
+                <button onclick="closeModal('consultModal')" class="text-secondary hover:text-primary" aria-label="关闭">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <form id="consultForm" class="space-y-4">
+                <div>
+                    <label class="form-label">您的姓名</label>
+                    <input type="text" name="name" class="form-input" placeholder="请输入您的姓名" required>
+                </div>
+                <div>
+                    <label class="form-label">联系电话</label>
+                    <input type="tel" name="phone" class="form-input" placeholder="请输入您的电话" required>
+                </div>
+                <div>
+                    <label class="form-label">店铺类型</label>
+                    <select name="shopType" class="form-input" required>
+                        <option value="">请选择店铺类型</option>
+                        <option value="餐饮美食">餐饮美食</option>
+                        <option value="美容美发">美容美发</option>
+                        <option value="服装零售">服装零售</option>
+                        <option value="教育培训">教育培训</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">主要困扰</label>
+                    <textarea name="content" class="form-input" rows="3" placeholder="简单描述您目前遇到的主要问题"></textarea>
+                </div>
+                <button type="submit" class="btn-primary w-full">
+                    提交咨询申请
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Enrollment Modal -->
+    <div id="enrollModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-strong">立即报名</h3>
+                <button onclick="closeModal('enrollModal')" class="text-secondary hover:text-primary" aria-label="关闭">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="text-center mb-6">
+                <div class="text-3xl font-bold text-gradient mb-2">¥2,699</div>
+                <div class="text-secondary">前20名专享价（原价¥2,999）</div>
+            </div>
+            <form id="enrollForm" class="space-y-4">
+                <div>
+                    <label class="form-label">您的姓名</label>
+                    <input type="text" name="name" class="form-input" placeholder="请输入您的姓名" required>
+                </div>
+                <div>
+                    <label class="form-label">联系电话</label>
+                    <input type="tel" name="phone" class="form-input" placeholder="请输入您的电话" required>
+                </div>
+                <div>
+                    <label class="form-label">微信号</label>
+                    <input type="text" name="wechat" class="form-input" placeholder="请输入您的微信号" required>
+                </div>
+                <div>
+                    <label class="form-label">店铺类型</label>
+                    <select name="shopType" class="form-input" required>
+                        <option value="">请选择店铺类型</option>
+                        <option value="餐饮美食">餐饮美食</option>
+                        <option value="美容美发">美容美发</option>
+                        <option value="服装零售">服装零售</option>
+                        <option value="教育培训">教育培训</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary w-full">
+                    确认报名
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Demo Video Modal -->
+    <div id="demoModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-strong">学员成功案例</h3>
+                <button onclick="closeModal('demoModal')" class="text-secondary hover:text-primary" aria-label="关闭">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="aspect-video bg-neutral-100 rounded-lg flex items-center justify-center mb-6">
+                <div class="text-center">
+                    <i data-lucide="play-circle" class="w-16 h-16 text-neutral-400 mx-auto mb-4"></i>
+                    <p class="text-neutral-600">点击播放成功案例视频</p>
+                </div>
+            </div>
+            <div class="text-center">
+                <button class="btn-primary" onclick="closeModal('demoModal'); scrollToSection('pricing')">
+                    看完案例，立即报名
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Theme switching
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const body = document.body;
+
+        themeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const theme = option.getAttribute('data-theme');
+                body.setAttribute('data-theme', theme);
+
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+
+                localStorage.setItem('preferred-theme', theme);
+            });
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('preferred-theme') || 'minimal';
+        body.setAttribute('data-theme', savedTheme);
+        document.querySelector(`[data-theme="${savedTheme}"]`).classList.add('active');
+
+        // Progress bar
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        }
+
+        window.addEventListener('scroll', updateProgressBar, { passive: true });
+
+        // Mobile menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Smooth scrolling
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Modal functionality
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                modal.setAttribute('aria-hidden', 'false');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // Countdown timer
+        function startCountdown() {
+            const endDate = new Date().getTime() + (7 * 24 * 60 * 60 * 1000) + (23 * 60 * 60 * 1000) + (59 * 60 * 1000) + (30 * 1000);
+
+            const timer = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = endDate - now;
+
+                if (distance < 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').innerHTML = '<div class="text-xl font-bold">优惠已结束</div>';
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('days').textContent = String(days).padStart(2, '0');
+                document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            }, 1000);
+        }
+
+        // Form handling
+        document.getElementById('consultForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // 获取表单数据
+            const formData = new FormData(e.target);
+            const consultationData = {
+                name: formData.get('name') || document.querySelector('#consultForm input[placeholder*="姓名"]').value,
+                phone: formData.get('phone') || document.querySelector('#consultForm input[type="tel"]').value,
+                shopType: formData.get('shopType') || document.querySelector('#consultForm select').value,
+                content: formData.get('content') || document.querySelector('#consultForm textarea').value
+            };
+
+            // 验证数据
+            if (!consultationData.name || !consultationData.phone || !consultationData.shopType) {
+                alert('请填写完整信息！');
+                return;
+            }
+
+            // 保存到数据管理系统
+            const consultation = window.dataManager.addConsultation(consultationData);
+
+            // 显示成功消息
+            alert('咨询申请已提交！我们将在24小时内联系您。\n您的咨询编号：' + consultation.id);
+
+            // 重置表单
+            e.target.reset();
+            closeModal('consultModal');
+
+            // 更新剩余名额
+            updateRemainingSpots();
+        });
+
+        document.getElementById('enrollForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // 获取表单数据
+            const formData = new FormData(e.target);
+            const enrollmentData = {
+                name: formData.get('name') || document.querySelector('#enrollForm input[placeholder*="姓名"]').value,
+                phone: formData.get('phone') || document.querySelector('#enrollForm input[type="tel"]').value,
+                wechat: formData.get('wechat') || document.querySelector('#enrollForm input[placeholder*="微信"]').value,
+                shopType: formData.get('shopType') || document.querySelector('#enrollForm select').value
+            };
+
+            // 验证数据
+            if (!enrollmentData.name || !enrollmentData.phone || !enrollmentData.wechat || !enrollmentData.shopType) {
+                alert('请填写完整信息！');
+                return;
+            }
+
+            // 保存到数据管理系统
+            const enrollment = window.dataManager.addEnrollment(enrollmentData);
+
+            // 显示成功消息
+            alert('报名成功！请添加微信：growth-coach 完成后续流程。\n您的报名编号：' + enrollment.id);
+
+            // 重置表单
+            e.target.reset();
+            closeModal('enrollModal');
+
+            // 更新剩余名额
+            updateRemainingSpots();
+        });
+
+        // Create growth chart with enhanced error handling
+        function createGrowthChart() {
+            const ctx = document.getElementById('growthChart');
+            const chartContainer = document.querySelector('.chart-container');
+            const fallback = document.getElementById('chart-fallback');
+
+            if (!ctx) return;
+
+            try {
+                // Hide loading spinner once chart starts loading
+                setTimeout(() => {
+                    if (chartContainer && chartContainer.querySelector('::before')) {
+                        chartContainer.style.position = 'relative';
+                    }
+                }, 100);
+
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['学习前', '第1月', '第2月', '第3月', '第6月', '第12月'],
+                        datasets: [{
+                            label: '月营业额 (万元)',
+                            data: [10, 12, 18, 22, 28, 35],
+                            borderColor: '#0088ff',
+                            backgroundColor: 'rgba(0, 136, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#0088ff',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }, {
+                            label: '私域客户数',
+                            data: [0, 200, 800, 1500, 2800, 4500],
+                            borderColor: '#0070f3',
+                            backgroundColor: 'rgba(0, 112, 243, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#0070f3',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 14,
+                                        weight: 600
+                                    },
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#000000',
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#0088ff',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)',
+                                    lineWidth: 1
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#666666',
+                                    font: {
+                                        size: 12,
+                                        weight: 500
+                                    }
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)',
+                                    lineWidth: 1
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#666666',
+                                    font: {
+                                        size: 12,
+                                        weight: 500
+                                    }
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false,
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#666666',
+                                    font: {
+                                        size: 12,
+                                        weight: 500
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeInOutQuart'
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+
+                // Hide loading spinner after chart is created
+                if (chartContainer) {
+                    chartContainer.classList.add('chart-loaded');
+                }
+
+                return chart;
+            } catch (error) {
+                console.error('Chart creation failed:', error);
+                // Show fallback if chart fails to load
+                if (fallback) {
+                    ctx.style.display = 'none';
+                    fallback.style.display = 'block';
+                }
+                if (chartContainer) {
+                    chartContainer.classList.add('chart-loaded');
+                }
+            }
+        }
+
+        // Remaining spots animation - 更智能的名额管理
+        function updateRemainingSpots() {
+            const spots = document.getElementById('remainingSpots');
+            if (spots) {
+                const stats = window.dataManager.getStats();
+                // 计算剩余名额：假设总名额50个，减去已报名数量
+                const totalSlots = 50;
+                let remaining = Math.max(5, totalSlots - stats.totalEnrollments);
+
+                // 添加一些随机波动以增加紧迫感
+                if (Math.random() < 0.1 && remaining > 8) {
+                    remaining = remaining - 1;
+                }
+
+                spots.textContent = remaining;
+
+                // 当名额较少时改变颜色
+                if (remaining <= 10) {
+                    spots.parentElement.classList.add('text-red-600');
+                    spots.parentElement.classList.remove('text-brand-700');
+                } else {
+                    spots.parentElement.classList.add('text-brand-700');
+                    spots.parentElement.classList.remove('text-red-600');
+                }
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (modal.style.display === 'flex') {
+                        closeModal(modal.id);
+                    }
+                });
+            }
+        });
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化聊天管理器
+            window.chatManager = new ChatManager();
+
+            startCountdown();
+            createGrowthChart();
+
+            // 加载后台设置的内容
+            loadSiteSettings();
+
+            // Update spots every 30 seconds
+            setInterval(updateRemainingSpots, 30000);
+
+            // 监听设置更新
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'settings_update') {
+                    loadSiteSettings();
+                }
+            });
+
+            // Initialize animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-slide-up');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe cards for animations
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // 加载网站设置
+        function loadSiteSettings() {
+            try {
+                const saved = localStorage.getItem('siteSettings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    updateSiteContent(settings);
+                }
+            } catch (error) {
+                console.error('加载网站设置失败:', error);
+            }
+        }
+
+        // 更新网站内容
+        function updateSiteContent(settings) {
+            // 更新标题和描述
+            if (settings.siteTitle) {
+                document.title = settings.siteTitle;
+                const metaTitle = document.querySelector('meta[property="og:title"]');
+                if (metaTitle) metaTitle.content = settings.siteTitle;
+            }
+
+            if (settings.siteDescription) {
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.content = settings.siteDescription;
+            }
+
+            // 更新价格
+            if (settings.coursePrice && settings.discountPrice) {
+                const originalPrice = document.querySelector('.pricing-card .line-through');
+                if (originalPrice) originalPrice.textContent = `原价 ¥${settings.coursePrice}`;
+
+                const currentPrice = document.querySelector('.pricing-card .text-6xl');
+                if (currentPrice) currentPrice.textContent = `¥${settings.discountPrice}`;
+
+                const specialOfferPrice = document.querySelector('.bg-yellow-400 strong');
+                if (specialOfferPrice) specialOfferPrice.textContent = `¥${settings.discountPrice}`;
+            }
+
+            // 更新数据展示
+            if (settings.costReduction) {
+                const costElements = document.querySelectorAll('.text-4xl:contains("70%")');
+                costElements.forEach(el => {
+                    if (el.textContent.includes('70%')) {
+                        el.textContent = `${settings.costReduction}%+`;
+                    }
+                });
+            }
+
+            if (settings.repeatPurchase) {
+                const repeatElements = document.querySelectorAll('.text-4xl:contains("30%"), .text-4xl:contains("50%")');
+                repeatElements.forEach(el => {
+                    if (el.textContent.includes('30%') || el.textContent.includes('50%')) {
+                        el.textContent = `${settings.repeatPurchase}%+`;
+                    }
+                });
+            }
+
+            // 更新已报名人数
+            if (settings.enrolledCount) {
+                const enrolledElements = document.querySelectorAll('span:contains("3,847+")');
+                enrolledElements.forEach(el => {
+                    if (el.textContent.includes('3,847+')) {
+                        el.textContent = `${parseInt(settings.enrolledCount).toLocaleString()}+`;
+                    }
+                });
+            }
+
+            // 更新联系微信
+            if (settings.contactWechat) {
+                const wechatElements = document.querySelectorAll('span:contains("growth-coach")');
+                wechatElements.forEach(el => {
+                    if (el.textContent.includes('growth-coach')) {
+                        el.textContent = el.textContent.replace('growth-coach', settings.contactWechat);
+                    }
+                });
+            }
+
+            // 更新学员评价
+            if (settings.testimonials) {
+                updateTestimonialsSection(settings.testimonials);
+            }
+        }
+
+        // 更新学员评价区域
+        function updateTestimonialsSection(testimonials) {
+            const testimonialsGrid = document.querySelector('#testimonials .grid');
+            if (!testimonialsGrid || testimonials.length === 0) return;
+
+            testimonialsGrid.innerHTML = testimonials.map(t => `
+                <div class="feature-card">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
+                            ${t.avatar}
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold">${t.name}</h4>
+                            <p class="text-secondary">${t.business}</p>
+                        </div>
+                    </div>
+                    <blockquote class="mb-6 leading-relaxed text-secondary">
+                        "${t.content}"
+                    </blockquote>
+                    <div class="data-highlight bg-green-50">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-green-600 stat-number">${t.growth}</div>
+                                <div class="text-sm text-muted">增长数据</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-green-600 stat-number">${t.customers}</div>
+                                <div class="text-sm text-muted">客户数据</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 客服聊天系统 ==========
+        class ChatManager {
+            constructor() {
+                this.currentUser = null;
+                this.messages = [];
+                this.isConnected = false;
+                this.autoReplies = this.loadAutoReplies();
+                this.quickReplies = this.loadQuickReplies();
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadChatHistory();
+                this.initWelcomeMessage();
+            }
+
+            loadAutoReplies() {
+                return JSON.parse(localStorage.getItem('chatAutoReplies') || JSON.stringify([
+                    {
+                        keywords: ['课程', '学习', '培训'],
+                        reply: '我们的私域增长闭环实战营是30天系统性课程，包含理论学习+实战指导+1对1陪跑，帮助实体店老板搭建完整的私域增长系统。',
+                        category: 'course'
+                    },
+                    {
+                        keywords: ['价格', '费用', '多少钱', '收费'],
+                        reply: '课程原价2999元，现在限时优惠价2699元！包含30天完整课程、实战工具包、专属社群和1对1指导服务。',
+                        category: 'price'
+                    },
+                    {
+                        keywords: ['报名', '如何参加', '怎么报名'],
+                        reply: '报名很简单！您可以点击页面上的"立即报名"按钮，填写基本信息即可。我们会有专业老师联系您，详细介绍课程安排。',
+                        category: 'enrollment'
+                    },
+                    {
+                        keywords: ['效果', '有用吗', '靠谱'],
+                        reply: '我们已经帮助500+实体店老板实现业绩增长，平均获客成本降低70%，复购率提升30%以上。每个学员都有专属的成功案例分析。',
+                        category: 'effectiveness'
+                    },
+                    {
+                        keywords: ['时间', '什么时候开始', '多久'],
+                        reply: '课程采用灵活学习制，报名后即可开始。30天完整学习周期，每周都有直播答疑和实战指导，确保学习效果。',
+                        category: 'time'
+                    }
+                ]));
+            }
+
+            loadQuickReplies() {
+                return JSON.parse(localStorage.getItem('chatQuickReplies') || JSON.stringify([
+                    '了解课程',
+                    '报名咨询',
+                    '价格优惠',
+                    '预约试听',
+                    '联系老师',
+                    '查看案例'
+                ]));
+            }
+
+            bindEvents() {
+                // 聊天按钮点击
+                document.getElementById('chatToggleBtn').addEventListener('click', () => {
+                    this.toggleChat();
+                });
+
+                // 关闭按钮点击
+                document.getElementById('chatCloseBtn').addEventListener('click', () => {
+                    this.closeChat();
+                });
+
+                // 发送按钮点击
+                document.getElementById('chatSendBtn').addEventListener('click', () => {
+                    this.sendMessage();
+                });
+
+                // 输入框事件
+                const chatInput = document.getElementById('chatInput');
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+
+                chatInput.addEventListener('input', (e) => {
+                    this.updateCharCounter(e.target.value.length);
+                });
+
+                // 快捷回复按钮
+                document.querySelectorAll('.quick-reply-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.sendQuickReply(e.target.textContent);
+                    });
+                });
+
+                // 用户信息表单提交
+                document.getElementById('chatUserForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitUserInfo();
+                });
+
+                // 监听后台管理员回复
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'admin_chat_reply') {
+                        this.handleAdminReply(e);
+                    }
+                });
+            }
+
+            initWelcomeMessage() {
+                // 设置欢迎消息时间
+                document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            toggleChat() {
+                const chatWindow = document.getElementById('chatWindow');
+                const isVisible = !chatWindow.classList.contains('hidden');
+
+                if (isVisible) {
+                    this.closeChat();
+                } else {
+                    this.openChat();
+                }
+            }
+
+            openChat() {
+                const chatWindow = document.getElementById('chatWindow');
+                chatWindow.classList.remove('hidden');
+
+                // 检查是否需要收集用户信息
+                if (!this.currentUser) {
+                    setTimeout(() => {
+                        this.showUserInfoModal();
+                    }, 2000);
+                }
+
+                // 焦点设置到输入框
+                setTimeout(() => {
+                    document.getElementById('chatInput').focus();
+                }, 300);
+            }
+
+            closeChat() {
+                const chatWindow = document.getElementById('chatWindow');
+                chatWindow.classList.add('hidden');
+            }
+
+            showUserInfoModal() {
+                document.getElementById('userInfoModal').style.display = 'flex';
+            }
+
+            closeUserInfoModal() {
+                document.getElementById('userInfoModal').style.display = 'none';
+            }
+
+            submitUserInfo() {
+                const name = document.getElementById('chatUserName').value;
+                const phone = document.getElementById('chatUserPhone').value;
+                const shopType = document.getElementById('chatUserShopType').value;
+
+                if (!name || !phone || !shopType) {
+                    alert('请填写完整信息');
+                    return;
+                }
+
+                // 使用数据管理器创建或获取用户会话
+                const sessionInfo = window.dataManager.createOrGetChatSession({
+                    name,
+                    phone,
+                    shopType
+                });
+
+                this.currentUser = {
+                    id: sessionInfo.userId,
+                    name: sessionInfo.userName,
+                    phone,
+                    shopType,
+                    joinTime: new Date().toISOString(),
+                    avatar: sessionInfo.userName.charAt(0),
+                    linkedConsultation: sessionInfo.linkedConsultation,
+                    linkedEnrollment: sessionInfo.linkedEnrollment
+                };
+
+                // 保存用户信息
+                this.saveChatUser();
+
+                // 关闭模态框
+                this.closeUserInfoModal();
+
+                // 根据是否有关联记录发送不同的欢迎消息
+                let welcomeMessage = `${this.currentUser.name}您好！很高兴为您服务。`;
+
+                if (this.currentUser.linkedConsultation) {
+                    welcomeMessage += `我看到您之前提交过咨询，关于"${this.currentUser.linkedConsultation.content.substring(0, 20)}..."的问题。`;
+                } else if (this.currentUser.linkedEnrollment) {
+                    welcomeMessage += `我看到您已经报名了我们的课程，感谢您的信任！`;
+                } else {
+                    welcomeMessage += `我了解到您是${shopType}行业的，我们有很多相关的成功案例可以分享给您。`;
+                }
+
+                welcomeMessage += `请问还有什么可以帮助您的吗？`;
+
+                this.addMessage({
+                    type: 'agent',
+                    content: welcomeMessage,
+                    timestamp: new Date().toISOString()
+                });
+
+                // 清空表单
+                document.getElementById('chatUserForm').reset();
+            }
+
+            sendMessage() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+
+                if (!message) return;
+
+                // 添加用户消息
+                this.addMessage({
+                    type: 'user',
+                    content: message,
+                    timestamp: new Date().toISOString()
+                });
+
+                // 清空输入框
+                input.value = '';
+                this.updateCharCounter(0);
+
+                // 保存到后台系统
+                this.saveMessageToAdmin(message, 'user');
+
+                // 检查自动回复
+                this.checkAutoReply(message);
+            }
+
+            sendQuickReply(text) {
+                document.getElementById('chatInput').value = text;
+                this.sendMessage();
+            }
+
+            addMessage(messageData) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageElement = this.createMessageElement(messageData);
+
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // 保存消息
+                this.messages.push(messageData);
+                this.saveChatHistory();
+
+                // 重新创建图标
+                lucide.createIcons();
+            }
+
+            createMessageElement(messageData) {
+                const div = document.createElement('div');
+                div.className = 'flex items-start space-x-2';
+
+                if (messageData.type === 'user') {
+                    div.innerHTML = `
+                        <div class="flex items-start space-x-2 ml-auto">
+                            <div class="message-user p-3 rounded-lg shadow-sm max-w-xs order-2">
+                                <p class="text-sm">${this.escapeHtml(messageData.content)}</p>
+                                <p class="text-xs opacity-75 mt-1">${this.formatTime(messageData.timestamp)}</p>
+                            </div>
+                            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 order-1">
+                                <span class="text-white font-medium text-sm">${this.currentUser ? this.currentUser.avatar : '我'}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="headphones" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <div class="message-agent p-3 rounded-lg shadow-sm max-w-xs">
+                            <p class="text-sm">${this.escapeHtml(messageData.content)}</p>
+                            <p class="text-xs text-gray-500 mt-1">${this.formatTime(messageData.timestamp)}</p>
+                        </div>
+                    `;
+                }
+
+                return div;
+            }
+
+            checkAutoReply(message) {
+                const lowerMessage = message.toLowerCase();
+                let matchedReply = null;
+
+                // 查找匹配的自动回复
+                for (const autoReply of this.autoReplies) {
+                    if (autoReply.keywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()))) {
+                        matchedReply = autoReply;
+                        break;
+                    }
+                }
+
+                if (matchedReply) {
+                    // 延迟回复，模拟真人客服
+                    setTimeout(() => {
+                        this.addMessage({
+                            type: 'agent',
+                            content: matchedReply.reply,
+                            timestamp: new Date().toISOString()
+                        });
+
+                        // 保存到后台系统
+                        this.saveMessageToAdmin(matchedReply.reply, 'agent');
+                    }, 1000 + Math.random() * 2000);
+                } else {
+                    // 没有匹配的自动回复，发送默认消息
+                    setTimeout(() => {
+                        this.addMessage({
+                            type: 'agent',
+                            content: '感谢您的咨询！我已经收到您的消息，专业客服将尽快为您详细解答。如果您有紧急问题，也可以直接拨打我们的服务热线。',
+                            timestamp: new Date().toISOString()
+                        });
+
+                        this.saveMessageToAdmin('感谢您的咨询！我已经收到您的消息，专业客服将尽快为您详细解答。', 'agent');
+                    }, 1500);
+                }
+            }
+
+            handleAdminReply(e) {
+                try {
+                    const replyData = JSON.parse(e.newValue);
+                    if (replyData.userId === this.currentUser?.id) {
+                        // 添加管理员回复消息
+                        this.addMessage({
+                            type: 'agent',
+                            content: replyData.message,
+                            timestamp: new Date().toISOString()
+                        });
+
+                        // 更新聊天会话的未读计数
+                        const chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                        const currentSession = chatSessions.find(s => s.userId === this.currentUser.id);
+                        if (currentSession) {
+                            currentSession.unreadCount = 0; // 清零用户端未读计数
+                            localStorage.setItem('chatSessions', JSON.stringify(chatSessions));
+                        }
+                    }
+                } catch (error) {
+                    console.error('处理管理员回复失败:', error);
+                }
+            }
+
+            saveMessageToAdmin(content, type) {
+                if (!this.currentUser) return;
+
+                // 获取现有聊天记录
+                const chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                let currentSession = chatSessions.find(s => s.userId === this.currentUser.id);
+
+                if (!currentSession) {
+                    currentSession = {
+                        userId: this.currentUser.id,
+                        userInfo: this.currentUser,
+                        messages: [],
+                        createdAt: new Date().toISOString(),
+                        lastMessageAt: new Date().toISOString(),
+                        status: 'active',
+                        unreadCount: 0
+                    };
+                    chatSessions.push(currentSession);
+                }
+
+                // 添加消息
+                currentSession.messages.push({
+                    id: Date.now(),
+                    type,
+                    content,
+                    timestamp: new Date().toISOString()
+                });
+
+                currentSession.lastMessageAt = new Date().toISOString();
+
+                // 如果是用户消息，增加未读计数
+                if (type === 'user') {
+                    currentSession.unreadCount++;
+                }
+
+                // 保存聊天会话
+                localStorage.setItem('chatSessions', JSON.stringify(chatSessions));
+
+                // 通知后台管理系统
+                this.notifyAdminNewMessage();
+            }
+
+            notifyAdminNewMessage() {
+                localStorage.setItem('chat_update', JSON.stringify({
+                    type: 'new_message',
+                    timestamp: Date.now(),
+                    userId: this.currentUser?.id
+                }));
+                localStorage.removeItem('chat_update');
+            }
+
+            saveChatUser() {
+                if (this.currentUser) {
+                    localStorage.setItem('currentChatUser', JSON.stringify(this.currentUser));
+                }
+            }
+
+            loadChatUser() {
+                const saved = localStorage.getItem('currentChatUser');
+                if (saved) {
+                    this.currentUser = JSON.parse(saved);
+                }
+            }
+
+            saveChatHistory() {
+                localStorage.setItem('chatHistory', JSON.stringify(this.messages));
+            }
+
+            loadChatHistory() {
+                const saved = localStorage.getItem('chatHistory');
+                if (saved) {
+                    this.messages = JSON.parse(saved);
+                    this.renderMessages();
+                }
+                this.loadChatUser();
+            }
+
+            renderMessages() {
+                const messagesContainer = document.getElementById('chatMessages');
+                // 清空现有消息（保留欢迎消息）
+                const welcomeMessage = messagesContainer.querySelector('.flex');
+                messagesContainer.innerHTML = '';
+                messagesContainer.appendChild(welcomeMessage);
+
+                // 添加历史消息
+                this.messages.forEach(message => {
+                    const messageElement = this.createMessageElement(message);
+                    messagesContainer.appendChild(messageElement);
+                });
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                lucide.createIcons();
+            }
+
+            updateCharCounter(count) {
+                document.getElementById('charCounter').textContent = `${count}/500`;
+            }
+
+            formatTime(timestamp) {
+                return new Date(timestamp).toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // 全局函数
+        function closeUserInfoModal() {
+            if (window.chatManager) {
+                window.chatManager.closeUserInfoModal();
+            }
+        }
+
+        // 创建聊天管理器实例 - 在DOM加载完成后初始化
+        let chatManagerInstance = null;
+
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('页面错误:', e.error);
+        });
+
+        // Performance monitoring
+        window.addEventListener('load', () => {
+            if ('performance' in window) {
+                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                console.log('页面加载时间:', loadTime + 'ms');
+            }
+        });
+    </script>
+
+    <!-- 客服聊天窗口 -->
+    <div id="chatWidget" class="fixed bottom-6 right-6 z-50">
+        <!-- 聊天按钮 -->
+        <button id="chatToggleBtn" class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <i data-lucide="message-circle" class="w-8 h-8"></i>
+            <span id="chatBadge" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-bounce" style="display: none;">0</span>
+        </button>
+
+        <!-- 聊天窗口 -->
+        <div id="chatWindow" class="absolute bottom-20 right-0 w-80 h-96 bg-white rounded-xl shadow-2xl border border-gray-200 hidden animate-scale-up">
+            <!-- 聊天头部 -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-t-xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                            <i data-lucide="headphones" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">在线客服</h3>
+                            <p class="text-xs opacity-90" id="customerServiceStatus">客服在线，随时为您服务</p>
+                        </div>
+                    </div>
+                    <button id="chatCloseBtn" class="text-white/80 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 聊天消息区域 -->
+            <div id="chatMessages" class="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                <!-- 欢迎消息 -->
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm max-w-xs">
+                        <p class="text-sm text-gray-700">您好！欢迎咨询增长陪跑教练，我是您的专属客服小助手。请问有什么可以帮助您的吗？</p>
+                        <p class="text-xs text-gray-500 mt-1" id="welcomeTime"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快捷回复按钮 -->
+            <div id="quickReplies" class="px-4 py-2 border-t border-gray-200 bg-white">
+                <div class="flex flex-wrap gap-2">
+                    <button class="quick-reply-btn px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors">
+                        了解课程
+                    </button>
+                    <button class="quick-reply-btn px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors">
+                        报名咨询
+                    </button>
+                    <button class="quick-reply-btn px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors">
+                        价格优惠
+                    </button>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="p-4 border-t border-gray-200 bg-white rounded-b-xl">
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="chatInput" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                           placeholder="输入消息..." maxlength="500" />
+                    <button id="chatSendBtn" class="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
+                    <span>按回车发送</span>
+                    <span id="charCounter">0/500</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户信息收集模态框 -->
+    <div id="userInfoModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]" style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">开启专属服务</h3>
+                <p class="text-gray-600 text-sm">为了更好地为您服务，请留下您的联系方式</p>
+            </div>
+
+            <form id="chatUserForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">称呼</label>
+                    <input type="text" id="chatUserName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="请输入您的称呼" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+                    <input type="tel" id="chatUserPhone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="请输入您的手机号" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">店铺类型</label>
+                    <select id="chatUserShopType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">请选择店铺类型</option>
+                        <option value="餐饮美食">餐饮美食</option>
+                        <option value="美容美发">美容美发</option>
+                        <option value="服装鞋帽">服装鞋帽</option>
+                        <option value="数码家电">数码家电</option>
+                        <option value="母婴用品">母婴用品</option>
+                        <option value="健身运动">健身运动</option>
+                        <option value="教育培训">教育培训</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeUserInfoModal()" class="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        稍后再说
+                    </button>
+                    <button type="submit" class="flex-1 py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors">
+                        开始聊天
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        @keyframes scale-up {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-scale-up {
+            animation: scale-up 0.3s ease-out;
+        }
+
+        #chatWidget .quick-reply-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* 聊天消息样式 */
+        .message-user {
+            margin-left: auto;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+
+        .message-agent {
+            margin-right: auto;
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 滚动条样式 */
+        #chatMessages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #chatMessages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        #chatMessages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        #chatMessages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* 输入框聚焦效果 */
+        #chatInput:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            #chatWidget {
+                bottom: 1rem;
+                right: 1rem;
+            }
+
+            #chatWindow {
+                width: calc(100vw - 2rem);
+                height: 400px;
+                right: -1rem;
+            }
+        }
+    </style>
+</body>
+</html>
