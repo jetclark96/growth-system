@@ -1,0 +1,3821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增长陪跑教练 - 后端管理系统</title>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="data_manager.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 2px;
+        }
+
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.5);
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            backdrop-filter: blur(8px);
+        }
+
+        .status-badge {
+            transition: all 0.2s ease;
+        }
+
+        .status-new {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .status-processing {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 侧边栏 -->
+    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl border-r border-gray-200">
+        <!-- 顶部Logo -->
+        <div class="flex items-center justify-center h-16 px-6 border-b border-gray-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="text-lg font-bold text-gray-900">管理后台</span>
+            </div>
+        </div>
+
+        <!-- 用户信息 -->
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <span class="text-white font-medium">管</span>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">管理员</p>
+                    <p class="text-xs text-gray-500">admin@growth.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导航菜单 -->
+        <nav class="px-4 py-6 sidebar-scrollbar overflow-y-auto" style="height: calc(100vh - 140px);">
+            <div class="space-y-2">
+                <div class="sidebar-item active px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">仪表板</span>
+                </div>
+
+                <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="consultations">
+                    <i data-lucide="message-circle" class="w-5 h-5 text-gray-600"></i>
+                    <span class="font-medium text-gray-700">咨询管理</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full" id="newConsultCount">3</span>
+                </div>
+
+                <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="enrollments">
+                    <i data-lucide="users" class="w-5 h-5 text-gray-600"></i>
+                    <span class="font-medium text-gray-700">报名管理</span>
+                </div>
+
+                <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="content">
+                    <i data-lucide="file-text" class="w-5 h-5 text-gray-600"></i>
+                    <span class="font-medium text-gray-700">内容管理</span>
+                </div>
+
+                <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="chat">
+                    <i data-lucide="message-square" class="w-5 h-5 text-gray-600"></i>
+                    <span class="font-medium text-gray-700">客服聊天</span>
+                    <span id="chatNotificationBadge" class="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" style="display: none;">0</span>
+                </div>
+
+                <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="analytics">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-gray-600"></i>
+                    <span class="font-medium text-gray-700">数据分析</span>
+                </div>
+
+                <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3" data-section="settings">
+                    <i data-lucide="settings" class="w-5 h-5 text-gray-600"></i>
+                    <span class="font-medium text-gray-700">系统设置</span>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-gray-200">
+                    <div class="sidebar-item px-4 py-3 cursor-pointer flex items-center space-x-3 text-red-600 hover:bg-red-50" onclick="logout()">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <span class="font-medium">退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="ml-64">
+        <!-- 顶部导航 -->
+        <header class="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-6">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-semibold text-gray-900" id="pageTitle">仪表板</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- 通知中心 -->
+                <div class="relative">
+                    <button id="notificationBtn" class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" style="display: none;">0</span>
+                    </button>
+
+                    <!-- 通知下拉菜单 -->
+                    <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50" style="display: none;">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-900">通知中心</h3>
+                                <button onclick="clearAllNotifications()" class="text-sm text-blue-600 hover:text-blue-800">
+                                    全部清除
+                                </button>
+                            </div>
+                        </div>
+                        <div id="notificationList" class="max-h-80 overflow-y-auto">
+                            <div class="p-4 text-center text-gray-500">
+                                <i data-lucide="bell-off" class="w-8 h-8 mx-auto mb-2 text-gray-400"></i>
+                                <p>暂无新通知</p>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-gray-200">
+                            <button onclick="viewAllNotifications()" class="w-full text-center text-sm text-blue-600 hover:text-blue-800 py-2">
+                                查看所有通知
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速操作 -->
+                <div class="relative">
+                    <button id="quickActionBtn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                    </button>
+
+                    <div id="quickActionDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-50" style="display: none;">
+                        <div class="p-2">
+                            <button onclick="exportAllData()" class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="download" class="w-4 h-4 mr-3"></i>
+                                导出所有数据
+                            </button>
+                            <button onclick="sendBulkEmail()" class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="mail" class="w-4 h-4 mr-3"></i>
+                                群发邮件
+                            </button>
+                            <button onclick="generateReport()" class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-3"></i>
+                                生成报告
+                            </button>
+                            <button onclick="systemBackup()" class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="hard-drive" class="w-4 h-4 mr-3"></i>
+                                系统备份
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户菜单 -->
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium text-sm" id="userAvatar">管</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700" id="userName">管理员</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-600"></i>
+                    </button>
+
+                    <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-50" style="display: none;">
+                        <div class="p-2">
+                            <button onclick="editProfile()" class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="user" class="w-4 h-4 mr-3"></i>
+                                个人资料
+                            </button>
+                            <button onclick="accountSettings()" class="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="settings" class="w-4 h-4 mr-3"></i>
+                                账户设置
+                            </button>
+                            <div class="border-t border-gray-200 my-2"></div>
+                            <button onclick="logout()" class="w-full flex items-center px-3 py-2 text-left hover:bg-red-50 text-red-600 rounded-lg transition-colors">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
+                                退出登录
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="p-6">
+            <!-- 仪表板 -->
+            <div id="dashboard" class="content-section active fade-in">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">总咨询数</p>
+                                <p class="text-3xl font-bold text-gray-900">1,247</p>
+                                <p class="text-sm text-green-600 mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-1"></i>
+                                    +12.5%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="message-circle" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">成功报名</p>
+                                <p class="text-3xl font-bold text-gray-900">342</p>
+                                <p class="text-sm text-green-600 mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-1"></i>
+                                    +8.2%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="user-check" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">转化率</p>
+                                <p class="text-3xl font-bold text-gray-900">27.4%</p>
+                                <p class="text-sm text-green-600 mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-1"></i>
+                                    +3.1%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="target" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">月收入</p>
+                                <p class="text-3xl font-bold text-gray-900">¥89.2万</p>
+                                <p class="text-sm text-green-600 mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-1"></i>
+                                    +15.3%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="dollar-sign" class="w-6 h-6 text-yellow-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">咨询趋势</h3>
+                        <div class="chart-container">
+                            <canvas id="consultationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">转化漏斗</h3>
+                        <div class="chart-container">
+                            <canvas id="conversionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最新咨询 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900">最新咨询</h3>
+                            <button class="text-blue-600 hover:text-blue-800 font-medium" onclick="switchSection('consultations')">
+                                查看全部
+                                <i data-lucide="arrow-right" class="w-4 h-4 inline ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-0">
+                        <div class="divide-y divide-gray-200">
+                            <div class="p-6 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">李</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">李女士</p>
+                                            <p class="text-sm text-gray-600">餐饮美食 • 成都</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="status-badge status-new px-3 py-1 rounded-full text-xs font-medium">新咨询</span>
+                                        <p class="text-sm text-gray-600 mt-1">5分钟前</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">王</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">王先生</p>
+                                            <p class="text-sm text-gray-600">美容美发 • 杭州</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="status-badge status-processing px-3 py-1 rounded-full text-xs font-medium">处理中</span>
+                                        <p class="text-sm text-gray-600 mt-1">1小时前</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">张</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">张总</p>
+                                            <p class="text-sm text-gray-600">服装零售 • 深圳</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="status-badge status-completed px-3 py-1 rounded-full text-xs font-medium">已完成</span>
+                                        <p class="text-sm text-gray-600 mt-1">3小时前</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 咨询管理 -->
+            <div id="consultations" class="content-section fade-in">
+                <!-- 操作栏 -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                            <input type="text" placeholder="搜索咨询记录..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80">
+                        </div>
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">全部状态</option>
+                            <option value="new">新咨询</option>
+                            <option value="processing">处理中</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">全部类型</option>
+                            <option value="restaurant">餐饮美食</option>
+                            <option value="beauty">美容美发</option>
+                            <option value="retail">服装零售</option>
+                            <option value="education">教育培训</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="btn-secondary px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2" onclick="exportConsultations()">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>导出数据</span>
+                        </button>
+                        <button class="btn-primary px-4 py-2 text-white rounded-lg flex items-center space-x-2" onclick="showBatchActions()">
+                            <i data-lucide="check-square" class="w-4 h-4"></i>
+                            <span>批量操作</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 咨询列表 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="table-container overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" id="selectAllConsultations" onchange="toggleAllConsultations(this.checked)">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">客户信息</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">联系方式</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">店铺类型</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">咨询时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="consultationTableBody">
+                                <!-- 动态生成内容 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                        <div class="flex items-center text-sm text-gray-700">
+                            显示 <span class="font-medium">1</span> 到 <span class="font-medium">20</span> 条，共 <span class="font-medium">247</span> 条记录
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">上一页</button>
+                            <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">2</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">3</button>
+                            <span class="px-3 py-1 text-sm text-gray-500">...</span>
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">25</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 报名管理 -->
+            <div id="enrollments" class="content-section fade-in">
+                <!-- 操作栏 -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                            <input type="text" placeholder="搜索报名记录..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80" id="enrollmentSearchInput">
+                        </div>
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="enrollmentStatusFilter">
+                            <option value="">全部状态</option>
+                            <option value="new">新报名</option>
+                            <option value="confirmed">已确认</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="enrollmentTypeFilter">
+                            <option value="">全部类型</option>
+                            <option value="餐饮美食">餐饮美食</option>
+                            <option value="美容美发">美容美发</option>
+                            <option value="服装零售">服装零售</option>
+                            <option value="教育培训">教育培训</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="btn-secondary px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2" onclick="exportEnrollments()">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>导出报名数据</span>
+                        </button>
+                        <button class="btn-primary px-4 py-2 text-white rounded-lg flex items-center space-x-2" onclick="showEnrollmentBatchActions()">
+                            <i data-lucide="check-square" class="w-4 h-4"></i>
+                            <span>批量操作</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 报名列表 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="table-container overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" id="selectAllEnrollments" onchange="toggleAllEnrollments(this.checked)">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学员信息</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">联系方式</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">微信号</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">店铺类型</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">报名时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="enrollmentTableBody">
+                                <!-- 动态生成内容 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                        <div class="flex items-center text-sm text-gray-700">
+                            显示报名记录: <span class="font-medium" id="enrollmentTableInfo">0 条记录</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors" onclick="prevEnrollmentPage()">上一页</button>
+                            <span class="px-3 py-1 bg-blue-600 text-white rounded text-sm" id="enrollmentCurrentPage">1</span>
+                            <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors" onclick="nextEnrollmentPage()">下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 内容管理 -->
+            <div id="content" class="content-section fade-in">
+                <div class="space-y-6">
+                    <!-- 页面配置 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">网站内容配置</h3>
+
+                        <!-- 基本信息设置 -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="space-y-4">
+                                <h4 class="text-md font-medium text-gray-900">基本信息</h4>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">网站标题</label>
+                                    <input type="text" id="siteTitle" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                           value="私域增长闭环实战营 - 30天打造店铺自动化获客系统" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">网站描述</label>
+                                    <textarea id="siteDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">30天手把手教你搭建实体店私域增长系统，获客成本降低70%，老客复购率提升30%，已帮助500+实体店老板实现持续增长</textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">联系微信</label>
+                                    <input type="text" id="contactWechat" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                           value="growth-coach" />
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <h4 class="text-md font-medium text-gray-900">课程信息</h4>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">课程价格</label>
+                                    <input type="number" id="coursePrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                           value="2999" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">优惠价格</label>
+                                    <input type="number" id="discountPrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                           value="2699" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">总名额</label>
+                                    <input type="number" id="totalSlots" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                           value="50" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">已报名人数</label>
+                                    <input type="number" id="enrolledCount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                           value="3847" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 数据展示设置 -->
+                        <div class="mb-8">
+                            <h4 class="text-md font-medium text-gray-900 mb-4">数据展示设置</h4>
+                            <div class="grid md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">获客成本降低比例</label>
+                                    <div class="flex items-center">
+                                        <input type="number" id="costReduction" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500" value="70" />
+                                        <span class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-gray-700">%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">复购率提升比例</label>
+                                    <div class="flex items-center">
+                                        <input type="number" id="repeatPurchase" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500" value="30" />
+                                        <span class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-gray-700">%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">运营效率提升比例</label>
+                                    <div class="flex items-center">
+                                        <input type="number" id="efficiencyImprovement" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500" value="300" />
+                                        <span class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-gray-700">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 学员评价管理 -->
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-md font-medium text-gray-900">学员评价管理</h4>
+                                <button class="btn-primary px-4 py-2 text-white rounded-lg" onclick="addTestimonial()">
+                                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                    添加评价
+                                </button>
+                            </div>
+                            <div id="testimonialsList" class="space-y-4">
+                                <!-- 学员评价列表 -->
+                            </div>
+                        </div>
+
+                        <!-- 学员成功案例视频管理 -->
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-md font-medium text-gray-900">学员成功案例视频</h4>
+                                <button class="btn-primary px-4 py-2 text-white rounded-lg" onclick="addSuccessVideo()">
+                                    <i data-lucide="video" class="w-4 h-4 mr-2"></i>
+                                    添加视频案例
+                                </button>
+                            </div>
+                            <div id="successVideosList" class="grid md:grid-cols-2 gap-4">
+                                <!-- 成功案例视频列表 -->
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="flex items-center space-x-4 pt-6 border-t border-gray-200">
+                            <button class="btn-primary px-6 py-2 text-white rounded-lg" onclick="saveContentSettings()">
+                                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                                保存设置
+                            </button>
+                            <button class="btn-secondary px-6 py-2 border border-gray-300 rounded-lg" onclick="previewChanges()">
+                                <i data-lucide="eye" class="w-4 h-4 mr-2"></i>
+                                预览效果
+                            </button>
+                            <button class="btn-secondary px-6 py-2 border border-gray-300 rounded-lg" onclick="resetToDefaults()">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                                重置默认
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据分析 -->
+            <div id="analytics" class="content-section fade-in">
+                <div class="text-center py-20">
+                    <i data-lucide="bar-chart-3" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">数据分析</h3>
+                    <p class="text-gray-600">查看详细的业务数据和趋势分析</p>
+                </div>
+            </div>
+
+            <!-- 客服聊天管理 -->
+            <div id="chat" class="content-section fade-in">
+                <div class="space-y-6">
+                    <!-- 聊天会话列表 -->
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <!-- 左侧：会话列表 -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                                <div class="p-4 border-b border-gray-200">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-semibold text-gray-900">聊天会话</h3>
+                                        <div class="flex items-center space-x-2">
+                                            <button onclick="refreshChatSessions()" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="showChatSettings()" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                                <i data-lucide="settings" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 搜索和筛选 -->
+                                    <div class="space-y-3">
+                                        <input type="text" id="chatSearch" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                                               placeholder="搜索用户..." onchange="filterChatSessions()" />
+                                        <select id="chatStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" onchange="filterChatSessions()">
+                                            <option value="">全部状态</option>
+                                            <option value="active">活跃中</option>
+                                            <option value="waiting">等待回复</option>
+                                            <option value="closed">已结束</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 会话列表 -->
+                                <div id="chatSessionsList" class="h-96 overflow-y-auto">
+                                    <div class="p-4 text-center text-gray-500">
+                                        <i data-lucide="message-circle-off" class="w-8 h-8 mx-auto mb-2 text-gray-400"></i>
+                                        <p>暂无聊天会话</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：聊天窗口 -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 h-full">
+                                <!-- 聊天头部 -->
+                                <div id="chatHeader" class="p-4 border-b border-gray-200 hidden">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                                <span id="currentChatAvatar" class="text-white font-medium">用</span>
+                                            </div>
+                                            <div>
+                                                <h4 id="currentChatName" class="font-semibold text-gray-900">用户名</h4>
+                                                <p id="currentChatInfo" class="text-sm text-gray-600">店铺类型 • 手机号</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span id="currentChatStatus" class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">在线</span>
+                                            <button onclick="closeChatSession()" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                                <i data-lucide="x" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 聊天消息区域 -->
+                                <div id="chatMessagesArea" class="h-80 overflow-y-auto p-4 bg-gray-50 hidden">
+                                    <!-- 消息会在这里显示 -->
+                                </div>
+
+                                <!-- 快捷回复和输入区域 -->
+                                <div id="chatInputArea" class="border-t border-gray-200 hidden">
+                                    <!-- 快捷回复按钮 -->
+                                    <div id="quickReplyArea" class="p-4 border-b border-gray-200 bg-white">
+                                        <div class="flex items-center mb-2">
+                                            <span class="text-sm font-medium text-gray-700">快捷回复：</span>
+                                        </div>
+                                        <div id="quickReplyButtons" class="flex flex-wrap gap-2">
+                                            <!-- 快捷回复按钮会在这里动态生成 -->
+                                        </div>
+                                    </div>
+
+                                    <!-- 输入区域 -->
+                                    <div class="p-4 bg-white">
+                                        <div class="flex items-end space-x-3">
+                                            <div class="flex-1">
+                                                <textarea id="chatReplyInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+                                                          rows="3" placeholder="输入回复消息..." maxlength="1000"></textarea>
+                                                <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
+                                                    <span>Ctrl+Enter 发送</span>
+                                                    <span id="replyCharCounter">0/1000</span>
+                                                </div>
+                                            </div>
+                                            <button id="sendReplyBtn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center space-x-2">
+                                                <i data-lucide="send" class="w-4 h-4"></i>
+                                                <span>发送</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 默认状态 -->
+                                <div id="chatDefaultState" class="flex items-center justify-center h-96 text-gray-500">
+                                    <div class="text-center">
+                                        <i data-lucide="message-square" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">选择一个聊天会话</h3>
+                                        <p class="text-gray-600">从左侧选择一个会话开始聊天</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 自动回复和快捷用语设置 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">自动回复设置</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <!-- 自动回复规则 -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h4 class="font-medium text-gray-900">自动回复规则</h4>
+                                        <button onclick="addAutoReplyRule()" class="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
+                                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                                            添加规则
+                                        </button>
+                                    </div>
+                                    <div id="autoReplyRules" class="space-y-3">
+                                        <!-- 自动回复规则会在这里显示 -->
+                                    </div>
+                                </div>
+
+                                <!-- 快捷回复模板 -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h4 class="font-medium text-gray-900">快捷回复模板</h4>
+                                        <button onclick="addQuickReplyTemplate()" class="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
+                                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                                            添加模板
+                                        </button>
+                                    </div>
+                                    <div id="quickReplyTemplates" class="space-y-3">
+                                        <!-- 快捷回复模板会在这里显示 -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-4 mt-6 pt-6 border-t border-gray-200">
+                                <button onclick="saveChatSettings()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                                    保存设置
+                                </button>
+                                <button onclick="resetChatSettings()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                                    重置默认
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统设置 -->
+            <div id="settings" class="content-section fade-in">
+                <div class="space-y-6">
+                    <!-- 系统配置 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">系统配置</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="space-y-6">
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">基础设置</h4>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">系统名称</label>
+                                        <input type="text" id="systemName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="增长陪跑教练管理系统" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">系统版本</label>
+                                        <input type="text" id="systemVersion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="v2.1.0" readonly />
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">时区设置</label>
+                                        <select id="timezone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
+                                            <option value="UTC">UTC (UTC+0)</option>
+                                            <option value="America/New_York">America/New_York (UTC-5)</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">语言设置</label>
+                                        <select id="language" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <option value="zh-CN">简体中文</option>
+                                            <option value="zh-TW">繁體中文</option>
+                                            <option value="en-US">English</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">安全设置</h4>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">会话超时时间（分钟）</label>
+                                        <input type="number" id="sessionTimeout" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="30" min="5" max="480" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">密码最小长度</label>
+                                        <input type="number" id="passwordMinLength" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="8" min="6" max="20" />
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="requireStrongPassword" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked />
+                                            <span class="text-sm text-gray-700">要求强密码（包含大小写字母、数字、特殊字符）</span>
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="enableTwoFactor" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                            <span class="text-sm text-gray-700">启用双因素认证</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 通知设置 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">通知设置</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="space-y-4">
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">邮件通知</h4>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="emailNewConsultation" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked />
+                                            <span class="text-sm text-gray-700">新咨询提醒</span>
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="emailNewEnrollment" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked />
+                                            <span class="text-sm text-gray-700">新报名提醒</span>
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="emailDailyReport" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                            <span class="text-sm text-gray-700">每日数据报告</span>
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">通知邮箱</label>
+                                        <input type="email" id="notificationEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="admin@growth.com" />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">系统通知</h4>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="browserNotification" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked />
+                                            <span class="text-sm text-gray-700">浏览器桌面通知</span>
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="soundNotification" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                            <span class="text-sm text-gray-700">声音提醒</span>
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">通知检查频率（秒）</label>
+                                        <input type="number" id="notificationInterval" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="30" min="10" max="300" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据管理 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">数据管理</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="space-y-4">
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">存储设置</h4>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">数据保留时间（天）</label>
+                                        <input type="number" id="dataRetentionDays" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="365" min="30" max="1095" />
+                                        <p class="text-xs text-gray-500 mt-1">超过此时间的数据将被自动清理</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">自动备份频率</label>
+                                        <select id="backupFrequency" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <option value="daily">每日备份</option>
+                                            <option value="weekly">每周备份</option>
+                                            <option value="monthly">每月备份</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="enableAutoCleanup" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked />
+                                            <span class="text-sm text-gray-700">启用自动数据清理</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">导出设置</h4>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">默认导出格式</label>
+                                        <select id="defaultExportFormat" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <option value="xlsx">Excel (.xlsx)</option>
+                                            <option value="csv">CSV (.csv)</option>
+                                            <option value="json">JSON (.json)</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">单次导出最大行数</label>
+                                        <input type="number" id="maxExportRows" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                               value="5000" min="100" max="50000" />
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="includeDeletedRecords" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                            <span class="text-sm text-gray-700">导出时包含已删除记录</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 账户管理 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">账户管理</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <div class="grid md:grid-cols-2 gap-8">
+                                    <div class="space-y-4">
+                                        <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">超级管理员账户</h4>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                                            <input type="text" id="adminUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                   value="admin" />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">显示名称</label>
+                                            <input type="text" id="adminDisplayName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                   value="超级管理员" />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                                            <input type="email" id="adminEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                   value="admin@growth.com" />
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2">密码管理</h4>
+
+                                        <button onclick="changePassword()" class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                            <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                                            修改密码
+                                        </button>
+
+                                        <button onclick="resetToDefault()" class="w-full flex items-center justify-center px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                                            重置为默认密码
+                                        </button>
+
+                                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                            <h5 class="font-medium text-blue-900 mb-2">初始登录信息</h5>
+                                            <p class="text-sm text-blue-800">用户名: <code class="bg-blue-100 px-2 py-1 rounded">admin</code></p>
+                                            <p class="text-sm text-blue-800">密码: <code class="bg-blue-100 px-2 py-1 rounded">admin123456</code></p>
+                                            <p class="text-xs text-blue-600 mt-2">⚠️ 首次登录后请立即修改密码</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 登录记录 -->
+                                <div>
+                                    <h4 class="text-md font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">最近登录记录</h4>
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <div class="space-y-2" id="loginHistory">
+                                            <!-- 登录记录将通过 JS 填充 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="flex items-center space-x-4">
+                        <button onclick="saveSystemSettings()" class="btn-primary px-6 py-2 text-white rounded-lg">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                            保存设置
+                        </button>
+                        <button onclick="resetSystemSettings()" class="btn-secondary px-6 py-2 border border-gray-300 rounded-lg">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                            重置设置
+                        </button>
+                        <button onclick="exportSystemConfig()" class="btn-secondary px-6 py-2 border border-gray-300 rounded-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                            导出配置
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 咨询详情模态框 -->
+    <div id="consultationModal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-900">咨询详情</h3>
+                    <button onclick="closeModal('consultationModal')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6" id="consultationModalContent">
+                <!-- 动态内容 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量操作模态框 -->
+    <div id="batchModal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-900">批量操作</h3>
+                    <button onclick="closeModal('batchModal')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <button onclick="batchUpdateStatus('completed')" class="w-full px-4 py-3 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                        <span>标记为已处理</span>
+                    </button>
+                    <button onclick="batchUpdateStatus('processing')" class="w-full px-4 py-3 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                        <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                        <span>标记为处理中</span>
+                    </button>
+                    <button onclick="batchDeleteConsultations()" class="w-full px-4 py-3 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                        <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+                        <span>删除选中项</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化 Lucide 图标
+        lucide.createIcons();
+
+        // 使用统一数据管理系统
+        let consultationData = [];
+        let enrollmentData = [];
+        let currentStats = {};
+
+        // 页面标题映射
+        const pageTitles = {
+            'dashboard': '仪表板',
+            'consultations': '咨询管理',
+            'enrollments': '报名管理',
+            'content': '内容管理',
+            'chat': '客服聊天',
+            'analytics': '数据分析',
+            'settings': '系统设置'
+        };
+
+        // 状态映射
+        const statusMap = {
+            'new': { text: '新咨询', class: 'status-new' },
+            'processing': { text: '处理中', class: 'status-processing' },
+            'completed': { text: '已完成', class: 'status-completed' }
+        };
+
+        // 刷新数据
+        function refreshData() {
+            consultationData = window.dataManager.consultations;
+            enrollmentData = window.dataManager.enrollments;
+            currentStats = window.dataManager.getStats();
+
+            // 更新新咨询数量徽章
+            const newConsultCount = document.getElementById('newConsultCount');
+            if (newConsultCount) {
+                newConsultCount.textContent = currentStats.newConsultations;
+                newConsultCount.style.display = currentStats.newConsultations > 0 ? 'block' : 'none';
+            }
+        }
+
+        // 更新管理页面显示
+        window.updateAdminDisplay = function() {
+            refreshData();
+
+            // 更新仪表板统计
+            updateDashboardStats();
+
+            // 如果当前在咨询管理页面，更新表格
+            if (document.getElementById('consultations').classList.contains('active')) {
+                renderConsultationTable();
+            }
+
+            // 如果当前在报名管理页面，更新表格
+            if (document.getElementById('enrollments').classList.contains('active')) {
+                renderEnrollmentTable();
+            }
+        };
+
+        // 更新仪表板统计数据
+        function updateDashboardStats() {
+            const stats = currentStats;
+
+            // 更新统计卡片
+            const statCards = document.querySelectorAll('.stat-card');
+            if (statCards.length >= 4) {
+                // 总咨询数
+                const totalConsultElement = statCards[0].querySelector('.text-3xl');
+                if (totalConsultElement) totalConsultElement.textContent = stats.totalConsultations;
+
+                // 成功报名
+                const enrollmentElement = statCards[1].querySelector('.text-3xl');
+                if (enrollmentElement) enrollmentElement.textContent = stats.totalEnrollments;
+
+                // 转化率
+                const conversionElement = statCards[2].querySelector('.text-3xl');
+                if (conversionElement) conversionElement.textContent = stats.conversionRate + '%';
+
+                // 计算收入 (假设每个报名2699元)
+                const revenue = (stats.totalEnrollments * 2699 / 10000).toFixed(1);
+                const revenueElement = statCards[3].querySelector('.text-3xl');
+                if (revenueElement) revenueElement.textContent = '¥' + revenue + '万';
+            }
+        }
+
+        // 侧边栏切换
+        function switchSection(sectionName) {
+            // 移除所有active类
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelectorAll('i').forEach(icon => {
+                    icon.classList.remove('text-white');
+                    icon.classList.add('text-gray-600');
+                });
+                item.querySelectorAll('span').forEach(span => {
+                    span.classList.remove('text-white');
+                    span.classList.add('text-gray-700');
+                });
+            });
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 添加active类到当前项
+            const activeItem = document.querySelector(`[data-section="${sectionName}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+                activeItem.querySelectorAll('i').forEach(icon => {
+                    icon.classList.remove('text-gray-600');
+                    icon.classList.add('text-white');
+                });
+                activeItem.querySelectorAll('span').forEach(span => {
+                    span.classList.remove('text-gray-700');
+                    span.classList.add('text-white');
+                });
+            }
+
+            // 显示对应内容
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // 更新页面标题
+            document.getElementById('pageTitle').textContent = pageTitles[sectionName] || '管理后台';
+
+            // 如果切换到咨询管理，渲染表格
+            if (sectionName === 'consultations') {
+                renderConsultationTable();
+            }
+
+            // 如果切换到报名管理，渲染表格
+            if (sectionName === 'enrollments') {
+                renderEnrollmentTable();
+            }
+        }
+
+        // 渲染咨询表格
+        function renderConsultationTable() {
+            const tbody = document.getElementById('consultationTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            consultationData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+
+                const statusInfo = statusMap[item.status];
+                const timeAgo = getTimeAgo(item.createdAt);
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" value="${item.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <span class="text-white font-medium text-sm">${item.avatar}</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">${item.name}</p>
+                                <p class="text-sm text-gray-600">${item.city || '未填写'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <p class="text-sm text-gray-900">${item.phone}</p>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">${item.shopType}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="status-badge ${statusInfo.class} px-3 py-1 rounded-full text-xs font-medium">${statusInfo.text}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <p class="text-sm text-gray-900">${timeAgo}</p>
+                        <p class="text-xs text-gray-600">${formatDateTime(item.createdAt)}</p>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800 transition-colors" onclick="viewConsultation(${item.id})" title="查看详情">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                            <button class="consultation-chat-btn transition-colors" data-phone="${item.phone}" data-user-id="user_${item.phone.replace(/\D/g, '')}" title="聊天窗口">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-800 transition-colors" onclick="editConsultation(${item.id})" title="编辑">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800 transition-colors" onclick="deleteConsultation(${item.id})" title="删除">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // 重新初始化图标
+            lucide.createIcons();
+
+            // 设置聊天按钮样式和事件
+            const chatButtons = document.querySelectorAll('.consultation-chat-btn');
+            chatButtons.forEach(btn => {
+                const userId = btn.dataset.userId;
+                const chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                const hasChatSession = chatSessions.some(session => session.userId === userId);
+
+                if (hasChatSession) {
+                    btn.className = 'consultation-chat-btn text-purple-600 hover:text-purple-800 transition-colors';
+                    btn.onclick = () => adminChatManager.openChatFromConsultation(userId);
+                } else {
+                    btn.className = 'consultation-chat-btn text-gray-400 opacity-50 cursor-not-allowed transition-colors';
+                    btn.onclick = () => false;
+                }
+            });
+        }
+
+        // 渲染报名表格
+        function renderEnrollmentTable() {
+            const tbody = document.getElementById('enrollmentTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            enrollmentData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+
+                const statusInfo = getEnrollmentStatusInfo(item.status);
+                const timeAgo = getTimeAgo(item.createdAt);
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" value="${item.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                                <span class="text-white font-medium text-sm">${item.avatar}</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">${item.name}</p>
+                                <p class="text-sm text-gray-600">学员</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <p class="text-sm text-gray-900">${item.phone}</p>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <p class="text-sm text-gray-900">${item.wechat}</p>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">${item.shopType}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="status-badge ${statusInfo.class} px-3 py-1 rounded-full text-xs font-medium">${statusInfo.text}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <p class="text-sm text-gray-900">${timeAgo}</p>
+                        <p class="text-xs text-gray-600">${formatDateTime(item.createdAt)}</p>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800 transition-colors" onclick="viewEnrollment(${item.id})" title="查看详情">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                            <button class="enrollment-chat-btn transition-colors" data-phone="${item.phone}" data-user-id="user_${item.phone.replace(/\D/g, '')}" title="聊天窗口">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-800 transition-colors" onclick="editEnrollment(${item.id})" title="编辑">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800 transition-colors" onclick="deleteEnrollment(${item.id})" title="删除">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // 更新表格信息
+            const tableInfo = document.getElementById('enrollmentTableInfo');
+            if (tableInfo) {
+                tableInfo.textContent = `${enrollmentData.length} 条记录`;
+            }
+
+            // 重新初始化图标
+            lucide.createIcons();
+
+            // 设置报名聊天按钮样式和事件
+            const chatButtons = document.querySelectorAll('.enrollment-chat-btn');
+            chatButtons.forEach(btn => {
+                const userId = btn.dataset.userId;
+                const chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                const hasChatSession = chatSessions.some(session => session.userId === userId);
+
+                if (hasChatSession) {
+                    btn.className = 'enrollment-chat-btn text-purple-600 hover:text-purple-800 transition-colors';
+                    btn.onclick = () => adminChatManager.openChatFromEnrollment(userId);
+                } else {
+                    btn.className = 'enrollment-chat-btn text-gray-400 opacity-50 cursor-not-allowed transition-colors';
+                    btn.onclick = () => false;
+                }
+            });
+        }
+
+        // 格式化日期时间
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 计算时间差
+        function getTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+            const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+
+            if (diffMinutes < 60) {
+                return `${diffMinutes}分钟前`;
+            } else if (diffHours < 24) {
+                return `${diffHours}小时前`;
+            } else {
+                return `${diffDays}天前`;
+            }
+        }
+
+        // 查看咨询详情
+        function viewConsultation(id) {
+            const consultation = consultationData.find(item => item.id === id);
+            if (!consultation) return;
+
+            const statusInfo = statusMap[consultation.status];
+
+            const modalContent = document.getElementById('consultationModalContent');
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">${consultation.avatar}</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-semibold text-gray-900">${consultation.name}</h4>
+                            <p class="text-gray-600">${consultation.city || '未填写'} • ${consultation.shopType}</p>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="status-badge ${statusInfo.class} px-3 py-1 rounded-full text-sm font-medium">${statusInfo.text}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                            <p class="text-gray-900">${consultation.phone}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">咨询时间</label>
+                            <p class="text-gray-900">${formatDateTime(consultation.createdAt)}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">咨询内容</label>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-gray-900 leading-relaxed">${consultation.content || '客户未填写详细内容'}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 pt-4 border-t border-gray-200">
+                        <button class="btn-primary px-6 py-2 text-white rounded-lg flex items-center space-x-2" onclick="updateConsultationStatus(${consultation.id}, 'processing')">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                            <span>标记处理中</span>
+                        </button>
+                        <button class="btn-secondary px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2" onclick="updateConsultationStatus(${consultation.id}, 'completed')">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>标记已完成</span>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800 px-6 py-2 border border-red-300 rounded-lg hover:bg-red-50 transition-colors flex items-center space-x-2" onclick="confirmDeleteConsultation(${consultation.id})">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <span>删除</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('consultationModal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        // 更新咨询状态
+        function updateConsultationStatus(id, status) {
+            if (window.dataManager.updateConsultationStatus(id, status)) {
+                refreshData();
+                updateDashboardStats();
+                renderConsultationTable();
+                closeModal('consultationModal');
+                alert('状态更新成功！');
+            } else {
+                alert('状态更新失败！');
+            }
+        }
+
+        // 确认删除咨询
+        function confirmDeleteConsultation(id) {
+            if (confirm('确定要删除这条咨询记录吗？此操作不可撤销。')) {
+                deleteConsultation(id);
+            }
+        }
+
+        // 编辑咨询
+        function editConsultation(id) {
+            viewConsultation(id); // 先查看详情，然后在详情页面操作
+        }
+
+        // 删除咨询
+        function deleteConsultation(id) {
+            if (window.dataManager.deleteConsultation(id)) {
+                refreshData();
+                updateDashboardStats();
+                renderConsultationTable();
+                closeModal('consultationModal');
+                alert('删除成功！');
+            } else {
+                alert('删除失败！');
+            }
+        }
+
+        // 显示批量操作模态框
+        function showBatchActions() {
+            document.getElementById('batchModal').style.display = 'flex';
+        }
+
+        // 关闭模态框
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 导出咨询数据
+        function exportConsultations() {
+            const exportData = window.dataManager.exportConsultations();
+            if (exportData.length === 0) {
+                alert('暂无数据可导出！');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(wb, ws, "咨询数据");
+
+            const fileName = `咨询数据导出_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                alert('已退出登录');
+                // 这里可以添加实际的登出逻辑
+            }
+        }
+
+        // 全选/取消全选咨询
+        function toggleAllConsultations(checked) {
+            const checkboxes = document.querySelectorAll('#consultationTableBody input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = checked;
+            });
+        }
+
+        // 全选/取消全选报名
+        function toggleAllEnrollments(checked) {
+            const checkboxes = document.querySelectorAll('#enrollmentTableBody input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = checked;
+            });
+        }
+
+        // 获取选中的咨询ID
+        function getSelectedConsultations() {
+            const checkboxes = document.querySelectorAll('#consultationTableBody input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // 获取选中的报名ID
+        function getSelectedEnrollments() {
+            const checkboxes = document.querySelectorAll('#enrollmentTableBody input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // 批量更新咨询状态
+        function batchUpdateStatus(newStatus) {
+            const selectedIds = getSelectedConsultations();
+            if (selectedIds.length === 0) {
+                alert('请先选择要操作的项目');
+                return;
+            }
+
+            const statusText = newStatus === 'completed' ? '已处理' : '处理中';
+            if (confirm(`确定将选中的 ${selectedIds.length} 条记录标记为${statusText}吗？`)) {
+                selectedIds.forEach(id => {
+                    window.dataManager.updateConsultationStatus(id, newStatus);
+                });
+
+                // 刷新显示
+                renderConsultationTable();
+                updateDashboardStats();
+                closeModal('batchModal');
+
+                // 取消全选
+                document.getElementById('selectAllConsultations').checked = false;
+
+                alert(`成功更新 ${selectedIds.length} 条记录`);
+            }
+        }
+
+        // 批量删除咨询
+        function batchDeleteConsultations() {
+            const selectedIds = getSelectedConsultations();
+            if (selectedIds.length === 0) {
+                alert('请先选择要删除的项目');
+                return;
+            }
+
+            if (confirm(`确定要删除选中的 ${selectedIds.length} 条记录吗？此操作不可恢复！`)) {
+                selectedIds.forEach(id => {
+                    window.dataManager.deleteConsultation(id);
+                });
+
+                // 刷新显示
+                renderConsultationTable();
+                updateDashboardStats();
+                closeModal('batchModal');
+
+                // 取消全选
+                document.getElementById('selectAllConsultations').checked = false;
+
+                alert(`成功删除 ${selectedIds.length} 条记录`);
+            }
+        }
+
+        // 批量更新报名状态
+        function batchUpdateEnrollmentStatus(newStatus) {
+            const selectedIds = getSelectedEnrollments();
+            if (selectedIds.length === 0) {
+                alert('请先选择要操作的项目');
+                return;
+            }
+
+            const statusText = newStatus === 'confirmed' ? '已确认' : newStatus === 'completed' ? '已完成' : '新报名';
+            if (confirm(`确定将选中的 ${selectedIds.length} 条记录标记为${statusText}吗？`)) {
+                selectedIds.forEach(id => {
+                    // 这里需要 dataManager 支持更新报名状态
+                    const enrollment = enrollmentData.find(e => e.id === id);
+                    if (enrollment) {
+                        enrollment.status = newStatus;
+                    }
+                });
+
+                // 保存到 localStorage
+                localStorage.setItem('enrollments', JSON.stringify(enrollmentData));
+
+                // 刷新显示
+                renderEnrollmentTable();
+                updateDashboardStats();
+                closeModal('enrollmentBatchModal');
+
+                // 取消全选
+                document.getElementById('selectAllEnrollments').checked = false;
+
+                alert(`成功更新 ${selectedIds.length} 条记录`);
+            }
+        }
+
+        // 批量删除报名
+        function batchDeleteEnrollments() {
+            const selectedIds = getSelectedEnrollments();
+            if (selectedIds.length === 0) {
+                alert('请先选择要删除的项目');
+                return;
+            }
+
+            if (confirm(`确定要删除选中的 ${selectedIds.length} 条记录吗？此操作不可恢复！`)) {
+                selectedIds.forEach(id => {
+                    const index = enrollmentData.findIndex(e => e.id === id);
+                    if (index > -1) {
+                        enrollmentData.splice(index, 1);
+                    }
+                });
+
+                // 保存到 localStorage
+                localStorage.setItem('enrollments', JSON.stringify(enrollmentData));
+
+                // 刷新显示
+                renderEnrollmentTable();
+                updateDashboardStats();
+                closeModal('enrollmentBatchModal');
+
+                // 取消全选
+                document.getElementById('selectAllEnrollments').checked = false;
+
+                alert(`成功删除 ${selectedIds.length} 条记录`);
+            }
+        }
+
+        // 创建图表
+        function createCharts() {
+            // 咨询趋势图
+            const consultationCtx = document.getElementById('consultationChart')?.getContext('2d');
+            if (consultationCtx) {
+                new Chart(consultationCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                        datasets: [{
+                            label: '咨询数量',
+                            data: [45, 52, 68, 84, 95, 112],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 转化漏斗图
+            const conversionCtx = document.getElementById('conversionChart')?.getContext('2d');
+            if (conversionCtx) {
+                new Chart(conversionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['已转化', '跟进中', '未转化'],
+                        datasets: [{
+                            data: [342, 156, 749],
+                            backgroundColor: [
+                                '#10b981',
+                                '#3b82f6',
+                                '#f59e0b'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 侧边栏点击事件
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                if (section) {
+                    switchSection(section);
+                }
+            });
+        });
+
+        // 点击模态框背景关闭
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+
+        // 获取报名状态信息
+        function getEnrollmentStatusInfo(status) {
+            switch(status) {
+                case 'new':
+                    return { text: '新报名', class: 'status-new' };
+                case 'confirmed':
+                    return { text: '已确认', class: 'status-processing' };
+                case 'completed':
+                    return { text: '已完成', class: 'status-completed' };
+                default:
+                    return { text: '未知', class: 'status-new' };
+            }
+        }
+
+        // 报名管理功能
+        function viewEnrollment(id) {
+            const enrollment = enrollmentData.find(item => item.id === id);
+            if (!enrollment) return;
+
+            const statusInfo = getEnrollmentStatusInfo(enrollment.status);
+
+            const modalContent = document.getElementById('consultationModalContent');
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">${enrollment.avatar}</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-semibold text-gray-900">${enrollment.name}</h4>
+                            <p class="text-gray-600">${enrollment.shopType} 学员</p>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="status-badge ${statusInfo.class} px-3 py-1 rounded-full text-sm font-medium">${statusInfo.text}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                            <p class="text-gray-900">${enrollment.phone}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">微信号</label>
+                            <p class="text-gray-900">${enrollment.wechat}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">店铺类型</label>
+                            <p class="text-gray-900">${enrollment.shopType}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">报名时间</label>
+                            <p class="text-gray-900">${formatDateTime(enrollment.createdAt)}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 pt-4 border-t border-gray-200">
+                        <button class="btn-primary px-6 py-2 text-white rounded-lg flex items-center space-x-2" onclick="updateEnrollmentStatus(${enrollment.id}, 'confirmed')">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span>确认报名</span>
+                        </button>
+                        <button class="btn-secondary px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2" onclick="updateEnrollmentStatus(${enrollment.id}, 'completed')">
+                            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                            <span>完成课程</span>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800 px-6 py-2 border border-red-300 rounded-lg hover:bg-red-50 transition-colors flex items-center space-x-2" onclick="confirmDeleteEnrollment(${enrollment.id})">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <span>删除</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('consultationModal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function editEnrollment(id) {
+            viewEnrollment(id);
+        }
+
+        function updateEnrollmentStatus(id, status) {
+            if (window.dataManager.updateEnrollmentStatus(id, status)) {
+                refreshData();
+                updateDashboardStats();
+                renderEnrollmentTable();
+                closeModal('consultationModal');
+                alert('状态更新成功！');
+            } else {
+                alert('状态更新失败！');
+            }
+        }
+
+        function confirmDeleteEnrollment(id) {
+            if (confirm('确定要删除这条报名记录吗？此操作不可撤销。')) {
+                deleteEnrollment(id);
+            }
+        }
+
+        function deleteEnrollment(id) {
+            if (window.dataManager.deleteEnrollment(id)) {
+                refreshData();
+                updateDashboardStats();
+                renderEnrollmentTable();
+                closeModal('consultationModal');
+                alert('删除成功！');
+            } else {
+                alert('删除失败！');
+            }
+        }
+
+        function exportEnrollments() {
+            const exportData = window.dataManager.exportEnrollments();
+            if (exportData.length === 0) {
+                alert('暂无数据可导出！');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(wb, ws, "报名数据");
+
+            const fileName = `报名数据导出_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function showEnrollmentBatchActions() {
+            document.getElementById('batchModal').style.display = 'flex';
+        }
+
+        function prevEnrollmentPage() {
+            // 分页功能实现
+            console.log('上一页');
+        }
+
+        function nextEnrollmentPage() {
+            // 分页功能实现
+            console.log('下一页');
+        }
+
+        // 内容管理功能
+        let testimonials = [
+            {
+                id: 1,
+                name: '李老板',
+                business: '成都火锅店',
+                avatar: '李',
+                content: '参加实战营前，我们90%的客源靠平台，利润薄得可怜。学完后，我们用老师教的方法，一个月加了2000多个顾客微信，现在30%的营业额都来自私域复购！',
+                growth: '+200%',
+                customers: '2000+'
+            },
+            {
+                id: 2,
+                name: '王女士',
+                business: '杭州美甲店',
+                avatar: '王',
+                content: '我最怕技术和复杂的东西。但这个课程真的太"保姆级"了！从企业微信设置到朋友圈内容，都有模板。现在我也能熟练地管理客户了！',
+                growth: '85%',
+                customers: '-60%'
+            },
+            {
+                id: 3,
+                name: '张总',
+                business: '连锁水果店',
+                avatar: '张',
+                content: '2999元花得太值了！不仅学到了系统方法，更重要的是进入了高质量圈子。群里每天都有老板分享经验，这种价值远超课程本身。',
+                growth: '150%',
+                customers: '5家'
+            }
+        ];
+
+        function renderTestimonials() {
+            const container = document.getElementById('testimonialsList');
+            if (!container) return;
+
+            container.innerHTML = testimonials.map(t => `
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <span class="text-white font-medium text-sm">${t.avatar}</span>
+                            </div>
+                            <div>
+                                <input type="text" value="${t.name}" class="font-medium text-gray-900 border-none bg-transparent p-0 focus:ring-0"
+                                       onchange="updateTestimonial(${t.id}, 'name', this.value)" />
+                                <input type="text" value="${t.business}" class="text-sm text-gray-600 border-none bg-transparent p-0 focus:ring-0"
+                                       onchange="updateTestimonial(${t.id}, 'business', this.value)" />
+                            </div>
+                        </div>
+                        <button class="text-red-600 hover:text-red-800" onclick="deleteTestimonial(${t.id})">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <textarea class="w-full p-2 border border-gray-300 rounded text-sm mb-4" rows="3"
+                              onchange="updateTestimonial(${t.id}, 'content', this.value)">${t.content}</textarea>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-gray-500">数据1</label>
+                            <input type="text" value="${t.growth}" class="w-full text-sm p-1 border border-gray-300 rounded"
+                                   onchange="updateTestimonial(${t.id}, 'growth', this.value)" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">数据2</label>
+                            <input type="text" value="${t.customers}" class="w-full text-sm p-1 border border-gray-300 rounded"
+                                   onchange="updateTestimonial(${t.id}, 'customers', this.value)" />
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function updateTestimonial(id, field, value) {
+            const testimonial = testimonials.find(t => t.id === id);
+            if (testimonial) {
+                testimonial[field] = value;
+                if (field === 'name') {
+                    testimonial.avatar = value.charAt(0);
+                }
+            }
+        }
+
+        function addTestimonial() {
+            const newId = Math.max(...testimonials.map(t => t.id)) + 1;
+            testimonials.push({
+                id: newId,
+                name: '新学员',
+                business: '新店铺',
+                avatar: '新',
+                content: '请输入学员评价内容...',
+                growth: '+0%',
+                customers: '0'
+            });
+            renderTestimonials();
+        }
+
+        function deleteTestimonial(id) {
+            if (confirm('确定要删除这条评价吗？')) {
+                testimonials = testimonials.filter(t => t.id !== id);
+                renderTestimonials();
+            }
+        }
+
+        // ========== 学员成功案例视频管理 ==========
+        let successVideos = [
+            {
+                id: 1,
+                title: '李老板火锅店案例',
+                description: '30天内私域客户增长2000+，营业额增长200%',
+                videoUrl: '',
+                thumbnail: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMzUgNzBMMTc1IDkwTDEzNSAxMTBWNzBaIiBmaWxsPSIjNjM2NkYxIi8+Cjx0ZXh0IHg9IjE2MCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzc0MTUxIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPueCueeUn+agkeS+izwvdGV4dD4KPC9zdmc+',
+                studentName: '李老板',
+                businessType: '餐饮美食',
+                uploadTime: new Date().toISOString(),
+                status: 'active',
+                views: 1250
+            },
+            {
+                id: 2,
+                title: '王女士美甲店转型',
+                description: '从技术小白到私域运营高手的蜕变历程',
+                videoUrl: '',
+                thumbnail: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRkVGM0Y0Ii8+CjxwYXRoIGQ9Ik0xMzUgNzBMMTc1IDkwTDEzNSAxMTBWNzBaIiBmaWxsPSIjRUM0ODk5Ii8+Cjx0ZXh0IHg9IjE2MCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzc0MTUxIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPue+juWuuee+juWPkTwvdGV4dD4KPC9zdmc+',
+                studentName: '王女士',
+                businessType: '美容美发',
+                uploadTime: new Date().toISOString(),
+                status: 'active',
+                views: 890
+            }
+        ];
+
+        function renderSuccessVideos() {
+            const container = document.getElementById('successVideosList');
+            if (!container) return;
+
+            container.innerHTML = successVideos.map(video => `
+                <div class="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+                    <!-- 视频预览区域 -->
+                    <div class="relative aspect-video bg-gray-200">
+                        ${video.videoUrl ?
+                            `<video class="w-full h-full object-cover" poster="${video.thumbnail}">
+                                <source src="${video.videoUrl}" type="video/mp4">
+                                您的浏览器不支持视频播放
+                            </video>` :
+                            `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                <div class="text-center">
+                                    <i data-lucide="video" class="w-12 h-12 text-gray-400 mx-auto mb-2"></i>
+                                    <p class="text-gray-500 text-sm">暂无视频</p>
+                                </div>
+                            </div>`
+                        }
+                        <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                            <button class="opacity-0 hover:opacity-100 bg-white bg-opacity-90 rounded-full p-3 transition-all duration-300" onclick="previewVideo(${video.id})">
+                                <i data-lucide="play" class="w-6 h-6 text-gray-700"></i>
+                            </button>
+                        </div>
+                        <!-- 状态标签 -->
+                        <div class="absolute top-3 right-3">
+                            <span class="px-2 py-1 text-xs rounded-full ${video.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
+                                ${video.status === 'active' ? '已发布' : '草稿'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 视频信息区域 -->
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <input type="text" value="${video.title}"
+                                       class="w-full font-medium text-gray-900 text-sm border-none bg-transparent p-0 focus:ring-0 focus:border-b focus:border-blue-500"
+                                       onchange="updateVideo(${video.id}, 'title', this.value)"
+                                       placeholder="请输入视频标题" />
+                            </div>
+                            <div class="flex items-center space-x-2 ml-2">
+                                <button class="text-blue-600 hover:text-blue-800 text-xs" onclick="editVideo(${video.id})" title="编辑">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-800 text-xs" onclick="deleteVideo(${video.id})" title="删除">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <textarea class="w-full text-xs text-gray-600 border-none bg-transparent p-0 focus:ring-0 focus:border-b focus:border-blue-500 resize-none"
+                                  rows="2" placeholder="请输入视频描述"
+                                  onchange="updateVideo(${video.id}, 'description', this.value)">${video.description}</textarea>
+
+                        <div class="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-200">
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">学员姓名</label>
+                                <input type="text" value="${video.studentName}"
+                                       class="w-full text-xs p-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                       onchange="updateVideo(${video.id}, 'studentName', this.value)" />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">行业类型</label>
+                                <select class="w-full text-xs p-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                        onchange="updateVideo(${video.id}, 'businessType', this.value)">
+                                    <option value="餐饮美食" ${video.businessType === '餐饮美食' ? 'selected' : ''}>餐饮美食</option>
+                                    <option value="美容美发" ${video.businessType === '美容美发' ? 'selected' : ''}>美容美发</option>
+                                    <option value="服装零售" ${video.businessType === '服装零售' ? 'selected' : ''}>服装零售</option>
+                                    <option value="教育培训" ${video.businessType === '教育培训' ? 'selected' : ''}>教育培训</option>
+                                    <option value="其他" ${video.businessType === '其他' ? 'selected' : ''}>其他</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                            <div class="text-xs text-gray-500">
+                                <span>播放：${video.views}</span> •
+                                <span>${formatDateTime(video.uploadTime)}</span>
+                            </div>
+                            <button class="text-xs px-3 py-1 rounded-full transition-colors ${video.status === 'active' ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-600'}"
+                                    onclick="toggleVideoStatus(${video.id})">
+                                ${video.status === 'active' ? '下线' : '发布'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function addSuccessVideo() {
+            const newVideo = {
+                id: Date.now(),
+                title: `新案例视频 ${successVideos.length + 1}`,
+                description: '请填写视频描述...',
+                videoUrl: '',
+                thumbnail: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMzUgNzBMMTc1IDkwTDEzNSAxMTBWNzBaIiBmaWxsPSIjNjM2NkYxIi8+CjwvdnVnPg==',
+                studentName: '',
+                businessType: '餐饮美食',
+                uploadTime: new Date().toISOString(),
+                status: 'draft',
+                views: 0
+            };
+
+            successVideos.unshift(newVideo);
+            renderSuccessVideos();
+        }
+
+        function editVideo(id) {
+            const video = successVideos.find(v => v.id === id);
+            if (!video) return;
+
+            // 打开视频编辑模态框
+            openVideoEditModal(video);
+        }
+
+        function updateVideo(id, field, value) {
+            const video = successVideos.find(v => v.id === id);
+            if (video) {
+                video[field] = value;
+                // 可以在这里添加自动保存功能
+                console.log(`视频 ${id} 的 ${field} 更新为: ${value}`);
+            }
+        }
+
+        function deleteVideo(id) {
+            if (confirm('确定要删除这个视频案例吗？')) {
+                successVideos = successVideos.filter(v => v.id !== id);
+                renderSuccessVideos();
+            }
+        }
+
+        function toggleVideoStatus(id) {
+            const video = successVideos.find(v => v.id === id);
+            if (video) {
+                video.status = video.status === 'active' ? 'draft' : 'active';
+                renderSuccessVideos();
+            }
+        }
+
+        function previewVideo(id) {
+            const video = successVideos.find(v => v.id === id);
+            if (video && video.videoUrl) {
+                // 打开视频预览模态框
+                openVideoPreviewModal(video);
+            } else {
+                alert('该视频暂无视频文件');
+            }
+        }
+
+        function openVideoEditModal(video) {
+            // 创建视频编辑模态框（这里可以进一步完善）
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">编辑视频案例</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">视频标题</label>
+                            <input type="text" value="${video.title}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   onchange="updateVideo(${video.id}, 'title', this.value)" />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">视频描述</label>
+                            <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                      onchange="updateVideo(${video.id}, 'description', this.value)">${video.description}</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">学员姓名</label>
+                                <input type="text" value="${video.studentName}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                       onchange="updateVideo(${video.id}, 'studentName', this.value)" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">行业类型</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        onchange="updateVideo(${video.id}, 'businessType', this.value)">
+                                    <option value="餐饮美食" ${video.businessType === '餐饮美食' ? 'selected' : ''}>餐饮美食</option>
+                                    <option value="美容美发" ${video.businessType === '美容美发' ? 'selected' : ''}>美容美发</option>
+                                    <option value="服装零售" ${video.businessType === '服装零售' ? 'selected' : ''}>服装零售</option>
+                                    <option value="教育培训" ${video.businessType === '教育培训' ? 'selected' : ''}>教育培训</option>
+                                    <option value="其他" ${video.businessType === '其他' ? 'selected' : ''}>其他</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">视频文件</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" accept="video/*" class="hidden" id="videoUpload${video.id}"
+                                       onchange="handleVideoUpload(${video.id}, this)" />
+                                <label for="videoUpload${video.id}" class="cursor-pointer">
+                                    <i data-lucide="upload" class="w-12 h-12 text-gray-400 mx-auto mb-2"></i>
+                                    <p class="text-gray-600">点击上传视频文件</p>
+                                    <p class="text-xs text-gray-500 mt-1">支持 MP4, AVI, MOV 格式，最大 100MB</p>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                        <button onclick="this.closest('.fixed').remove()"
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            取消
+                        </button>
+                        <button onclick="saveVideoChanges(${video.id}); this.closest('.fixed').remove(); renderSuccessVideos();"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            保存
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        function handleVideoUpload(id, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // 这里应该实现实际的文件上传逻辑
+            // 由于这是演示，我们模拟上传过程
+            const video = successVideos.find(v => v.id === id);
+            if (video) {
+                // 模拟上传进度
+                const fileName = file.name;
+                console.log(`开始上传视频: ${fileName}`);
+
+                // 创建临时URL（实际项目中应该上传到服务器）
+                const tempUrl = URL.createObjectURL(file);
+                video.videoUrl = tempUrl;
+                video.uploadTime = new Date().toISOString();
+
+                alert('视频上传成功！（演示模式）');
+            }
+        }
+
+        function saveVideoChanges(id) {
+            console.log(`保存视频 ${id} 的更改`);
+            // 这里可以添加保存到服务器的逻辑
+        }
+
+        function saveContentSettings() {
+            const settings = {
+                siteTitle: document.getElementById('siteTitle').value,
+                siteDescription: document.getElementById('siteDescription').value,
+                contactWechat: document.getElementById('contactWechat').value,
+                coursePrice: document.getElementById('coursePrice').value,
+                discountPrice: document.getElementById('discountPrice').value,
+                totalSlots: document.getElementById('totalSlots').value,
+                enrolledCount: document.getElementById('enrolledCount').value,
+                costReduction: document.getElementById('costReduction').value,
+                repeatPurchase: document.getElementById('repeatPurchase').value,
+                efficiencyImprovement: document.getElementById('efficiencyImprovement').value,
+                testimonials: testimonials,
+                successVideos: successVideos  // 添加成功案例视频到设置中
+            };
+
+            // 保存到localStorage
+            localStorage.setItem('siteSettings', JSON.stringify(settings));
+
+            // 通知前台页面更新
+            localStorage.setItem('settings_update', JSON.stringify({
+                timestamp: Date.now(),
+                settings: settings
+            }));
+            localStorage.removeItem('settings_update');
+
+            alert('设置已保存！前台页面将自动更新。');
+        }
+
+        function loadContentSettings() {
+            try {
+                const saved = localStorage.getItem('siteSettings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+
+                    // 加载基本设置
+                    if (document.getElementById('siteTitle')) document.getElementById('siteTitle').value = settings.siteTitle || '';
+                    if (document.getElementById('siteDescription')) document.getElementById('siteDescription').value = settings.siteDescription || '';
+                    if (document.getElementById('contactWechat')) document.getElementById('contactWechat').value = settings.contactWechat || 'growth-coach';
+                    if (document.getElementById('coursePrice')) document.getElementById('coursePrice').value = settings.coursePrice || '2999';
+                    if (document.getElementById('discountPrice')) document.getElementById('discountPrice').value = settings.discountPrice || '2699';
+                    if (document.getElementById('totalSlots')) document.getElementById('totalSlots').value = settings.totalSlots || '50';
+                    if (document.getElementById('enrolledCount')) document.getElementById('enrolledCount').value = settings.enrolledCount || '3847';
+                    if (document.getElementById('costReduction')) document.getElementById('costReduction').value = settings.costReduction || '70';
+                    if (document.getElementById('repeatPurchase')) document.getElementById('repeatPurchase').value = settings.repeatPurchase || '30';
+                    if (document.getElementById('efficiencyImprovement')) document.getElementById('efficiencyImprovement').value = settings.efficiencyImprovement || '300';
+
+                    // 加载学员评价
+                    if (settings.testimonials) {
+                        testimonials = settings.testimonials;
+                        renderTestimonials();
+                    }
+                }
+            } catch (error) {
+                console.error('加载设置失败:', error);
+            }
+        }
+
+        function previewChanges() {
+            // 打开前台页面预览
+            window.open('/', '_blank');
+        }
+
+        function resetToDefaults() {
+            if (confirm('确定要重置为默认设置吗？此操作不可撤销。')) {
+                localStorage.removeItem('siteSettings');
+                location.reload();
+            }
+        }
+
+        // ========== 通知系统功能 ==========
+        let notifications = [];
+        let notificationSettings = {
+            browserNotification: true,
+            soundNotification: false,
+            emailNotification: true,
+            interval: 30000 // 30秒
+        };
+
+        // 通知管理类
+        class NotificationManager {
+            constructor() {
+                this.notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+                this.settings = JSON.parse(localStorage.getItem('notificationSettings') || JSON.stringify(notificationSettings));
+                this.init();
+            }
+
+            init() {
+                this.updateNotificationBadge();
+                this.startNotificationCheck();
+                this.requestBrowserPermission();
+            }
+
+            requestBrowserPermission() {
+                if (this.settings.browserNotification && 'Notification' in window) {
+                    if (Notification.permission === 'default') {
+                        Notification.requestPermission();
+                    }
+                }
+            }
+
+            addNotification(type, title, message, data = {}) {
+                const notification = {
+                    id: Date.now(),
+                    type, // info, success, warning, error
+                    title,
+                    message,
+                    data,
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+
+                this.notifications.unshift(notification);
+                this.saveNotifications();
+                this.updateNotificationBadge();
+                this.showBrowserNotification(notification);
+                this.playNotificationSound();
+
+                return notification;
+            }
+
+            showBrowserNotification(notification) {
+                if (this.settings.browserNotification && 'Notification' in window && Notification.permission === 'granted') {
+                    const browserNotification = new Notification(notification.title, {
+                        body: notification.message,
+                        icon: '/favicon.ico',
+                        tag: `admin-${notification.id}`
+                    });
+
+                    browserNotification.onclick = () => {
+                        window.focus();
+                        this.markAsRead(notification.id);
+                        browserNotification.close();
+                    };
+
+                    setTimeout(() => {
+                        browserNotification.close();
+                    }, 5000);
+                }
+            }
+
+            playNotificationSound() {
+                if (this.settings.soundNotification) {
+                    // 创建通知音效
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LGeSIM');
+                    audio.volume = 0.3;
+                    audio.play().catch(() => {}); // 忽略播放错误
+                }
+            }
+
+            markAsRead(notificationId) {
+                const notification = this.notifications.find(n => n.id === notificationId);
+                if (notification) {
+                    notification.read = true;
+                    this.saveNotifications();
+                    this.updateNotificationBadge();
+                    this.renderNotifications();
+                }
+            }
+
+            markAllAsRead() {
+                this.notifications.forEach(n => n.read = true);
+                this.saveNotifications();
+                this.updateNotificationBadge();
+                this.renderNotifications();
+            }
+
+            clearAll() {
+                this.notifications = [];
+                this.saveNotifications();
+                this.updateNotificationBadge();
+                this.renderNotifications();
+            }
+
+            saveNotifications() {
+                localStorage.setItem('adminNotifications', JSON.stringify(this.notifications));
+            }
+
+            updateNotificationBadge() {
+                const unreadCount = this.notifications.filter(n => !n.read).length;
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                }
+            }
+
+            renderNotifications() {
+                const container = document.getElementById('notificationList');
+                if (!container) return;
+
+                if (this.notifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="p-4 text-center text-gray-500">
+                            <i data-lucide="bell-off" class="w-8 h-8 mx-auto mb-2 text-gray-400"></i>
+                            <p>暂无新通知</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = this.notifications.slice(0, 10).map(n => `
+                        <div class="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${n.read ? 'opacity-60' : ''}" onclick="notificationManager.markAsRead(${n.id})">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center ${this.getNotificationColor(n.type)}">
+                                    <i data-lucide="${this.getNotificationIcon(n.type)}" class="w-4 h-4 text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900 text-sm">${n.title}</h4>
+                                    <p class="text-gray-600 text-xs mt-1">${n.message}</p>
+                                    <p class="text-gray-400 text-xs mt-1">${this.formatTime(n.timestamp)}</p>
+                                </div>
+                                ${!n.read ? '<div class="w-2 h-2 bg-blue-500 rounded-full"></div>' : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                lucide.createIcons();
+            }
+
+            getNotificationColor(type) {
+                switch (type) {
+                    case 'success': return 'bg-green-500';
+                    case 'warning': return 'bg-yellow-500';
+                    case 'error': return 'bg-red-500';
+                    default: return 'bg-blue-500';
+                }
+            }
+
+            getNotificationIcon(type) {
+                switch (type) {
+                    case 'success': return 'check';
+                    case 'warning': return 'alert-triangle';
+                    case 'error': return 'x';
+                    default: return 'info';
+                }
+            }
+
+            formatTime(timestamp) {
+                const now = new Date();
+                const time = new Date(timestamp);
+                const diff = now - time;
+
+                if (diff < 60000) return '刚刚';
+                if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+                return `${Math.floor(diff / 86400000)}天前`;
+            }
+
+            startNotificationCheck() {
+                // 检查新的咨询和报名
+                setInterval(() => {
+                    this.checkNewData();
+                }, this.settings.interval);
+            }
+
+            checkNewData() {
+                const currentStats = window.dataManager.getStats();
+                const lastStats = JSON.parse(localStorage.getItem('lastStats') || '{}');
+
+                // 检查新咨询
+                if (currentStats.totalConsultations > (lastStats.totalConsultations || 0)) {
+                    const newCount = currentStats.totalConsultations - (lastStats.totalConsultations || 0);
+                    this.addNotification(
+                        'info',
+                        '新咨询提醒',
+                        `收到 ${newCount} 条新咨询，请及时处理`
+                    );
+                }
+
+                // 检查新报名
+                if (currentStats.totalEnrollments > (lastStats.totalEnrollments || 0)) {
+                    const newCount = currentStats.totalEnrollments - (lastStats.totalEnrollments || 0);
+                    this.addNotification(
+                        'success',
+                        '新报名提醒',
+                        `收到 ${newCount} 个新报名，恭喜！`
+                    );
+                }
+
+                localStorage.setItem('lastStats', JSON.stringify(currentStats));
+            }
+        }
+
+        // 创建通知管理器实例
+        const notificationManager = new NotificationManager();
+
+        // 通知相关事件处理
+        document.getElementById('notificationBtn').addEventListener('click', () => {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            notificationManager.renderNotifications();
+        });
+
+        function clearAllNotifications() {
+            notificationManager.clearAll();
+        }
+
+        function viewAllNotifications() {
+            // 切换到通知管理页面
+            alert('通知管理功能开发中...');
+        }
+
+        // 快速操作功能
+        document.getElementById('quickActionBtn').addEventListener('click', () => {
+            const dropdown = document.getElementById('quickActionDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        });
+
+        function exportAllData() {
+            const allData = {
+                consultations: window.dataManager.exportConsultations(),
+                enrollments: window.dataManager.exportEnrollments(),
+                exportTime: new Date().toISOString()
+            };
+
+            const wb = XLSX.utils.book_new();
+
+            // 咨询数据
+            const consultWs = XLSX.utils.json_to_sheet(allData.consultations);
+            XLSX.utils.book_append_sheet(wb, consultWs, "咨询数据");
+
+            // 报名数据
+            const enrollWs = XLSX.utils.json_to_sheet(allData.enrollments);
+            XLSX.utils.book_append_sheet(wb, enrollWs, "报名数据");
+
+            const fileName = `全量数据导出_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+            notificationManager.addNotification('success', '数据导出', '全量数据导出完成');
+        }
+
+        function sendBulkEmail() {
+            alert('群发邮件功能开发中...\n\n将支持：\n- 向所有咨询用户发送邮件\n- 向报名学员发送邮件\n- 自定义邮件模板');
+        }
+
+        function generateReport() {
+            const stats = window.dataManager.getStats();
+            const reportData = {
+                生成时间: new Date().toLocaleString('zh-CN'),
+                总咨询数: stats.totalConsultations,
+                总报名数: stats.totalEnrollments,
+                转化率: stats.conversionRate + '%',
+                新咨询数: stats.newConsultations,
+                处理中咨询: stats.processingConsultations,
+                已完成咨询: stats.completedConsultations
+            };
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet([reportData]);
+            XLSX.utils.book_append_sheet(wb, ws, "数据报告");
+
+            const fileName = `数据报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+            notificationManager.addNotification('success', '报告生成', '数据报告生成完成');
+        }
+
+        function systemBackup() {
+            const backupData = {
+                consultations: window.dataManager.consultations,
+                enrollments: window.dataManager.enrollments,
+                siteSettings: JSON.parse(localStorage.getItem('siteSettings') || '{}'),
+                systemSettings: JSON.parse(localStorage.getItem('systemSettings') || '{}'),
+                backupTime: new Date().toISOString(),
+                version: 'v2.1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `系统备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            notificationManager.addNotification('success', '系统备份', '系统备份完成');
+        }
+
+        // 用户菜单
+        document.getElementById('userMenuBtn').addEventListener('click', () => {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        });
+
+        function editProfile() {
+            alert('个人资料编辑功能开发中...');
+        }
+
+        function accountSettings() {
+            // 切换到系统设置页面
+            switchSection('settings');
+            document.getElementById('userDropdown').style.display = 'none';
+        }
+
+        // ========== 系统设置功能 ==========
+        function loadSystemSettings() {
+            try {
+                const settings = JSON.parse(localStorage.getItem('systemSettings') || '{}');
+
+                // 加载各项设置
+                Object.keys(settings).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = settings[key];
+                        } else {
+                            element.value = settings[key];
+                        }
+                    }
+                });
+
+                // 加载登录历史
+                loadLoginHistory();
+            } catch (error) {
+                console.error('加载系统设置失败:', error);
+            }
+        }
+
+        function saveSystemSettings() {
+            const settings = {};
+            const settingIds = [
+                'systemName', 'timezone', 'language', 'sessionTimeout', 'passwordMinLength',
+                'requireStrongPassword', 'enableTwoFactor', 'emailNewConsultation', 'emailNewEnrollment',
+                'emailDailyReport', 'notificationEmail', 'browserNotification', 'soundNotification',
+                'notificationInterval', 'dataRetentionDays', 'backupFrequency', 'enableAutoCleanup',
+                'defaultExportFormat', 'maxExportRows', 'includeDeletedRecords', 'adminUsername',
+                'adminDisplayName', 'adminEmail'
+            ];
+
+            settingIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        settings[id] = element.checked;
+                    } else {
+                        settings[id] = element.value;
+                    }
+                }
+            });
+
+            localStorage.setItem('systemSettings', JSON.stringify(settings));
+
+            // 更新通知设置
+            notificationManager.settings = {
+                browserNotification: settings.browserNotification,
+                soundNotification: settings.soundNotification,
+                emailNotification: settings.emailNewConsultation,
+                interval: (settings.notificationInterval || 30) * 1000
+            };
+            localStorage.setItem('notificationSettings', JSON.stringify(notificationManager.settings));
+
+            // 更新用户信息显示
+            if (settings.adminDisplayName) {
+                document.getElementById('userName').textContent = settings.adminDisplayName;
+                document.getElementById('userAvatar').textContent = settings.adminDisplayName.charAt(0);
+            }
+
+            notificationManager.addNotification('success', '设置保存', '系统设置已保存');
+        }
+
+        function resetSystemSettings() {
+            if (confirm('确定要重置所有系统设置吗？此操作不可撤销。')) {
+                localStorage.removeItem('systemSettings');
+                localStorage.removeItem('notificationSettings');
+                location.reload();
+            }
+        }
+
+        function exportSystemConfig() {
+            const config = {
+                systemSettings: JSON.parse(localStorage.getItem('systemSettings') || '{}'),
+                notificationSettings: JSON.parse(localStorage.getItem('notificationSettings') || '{}'),
+                siteSettings: JSON.parse(localStorage.getItem('siteSettings') || '{}'),
+                exportTime: new Date().toISOString(),
+                version: 'v2.1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `系统配置_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            notificationManager.addNotification('success', '配置导出', '系统配置导出完成');
+        }
+
+        function changePassword() {
+            const oldPassword = prompt('请输入当前密码:');
+            if (!oldPassword) return;
+
+            const newPassword = prompt('请输入新密码（至少8位字符）:');
+            if (!newPassword || newPassword.length < 8) {
+                alert('新密码长度至少为8位！');
+                return;
+            }
+
+            const confirmPassword = prompt('请再次输入新密码:');
+            if (newPassword !== confirmPassword) {
+                alert('两次输入的密码不一致！');
+                return;
+            }
+
+            // 这里应该调用实际的密码修改API
+            alert('密码修改功能需要后端支持。\\n\\n在实际应用中，这里会：\\n1. 验证当前密码\\n2. 更新数据库中的密码\\n3. 强制用户重新登录');
+
+            notificationManager.addNotification('success', '密码修改', '密码修改成功，请重新登录');
+        }
+
+        function resetToDefault() {
+            if (confirm('确定要重置为默认密码吗？\\n\\n默认密码：admin123456\\n\\n此操作会立即生效！')) {
+                alert('密码已重置为默认值：admin123456\\n\\n请立即登录并修改密码！');
+                notificationManager.addNotification('warning', '密码重置', '管理员密码已重置为默认值');
+            }
+        }
+
+        function loadLoginHistory() {
+            const history = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            const container = document.getElementById('loginHistory');
+
+            if (container) {
+                if (history.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 text-sm">暂无登录记录</p>';
+                } else {
+                    container.innerHTML = history.slice(0, 5).map(record => `
+                        <div class="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">${new Date(record.timestamp).toLocaleString('zh-CN')}</p>
+                                <p class="text-xs text-gray-600">${record.ip} • ${record.success ? '登录成功' : '登录失败'}</p>
+                            </div>
+                            <div class="w-2 h-2 rounded-full ${record.success ? 'bg-green-500' : 'bg-red-500'}"></div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', (e) => {
+            const dropdowns = ['notificationDropdown', 'quickActionDropdown', 'userDropdown'];
+            dropdowns.forEach(dropdownId => {
+                const dropdown = document.getElementById(dropdownId);
+                const button = document.getElementById(dropdownId.replace('Dropdown', 'Btn'));
+                if (dropdown && !dropdown.contains(e.target) && !button.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
+
+        // ========== 登录验证和权限管理 ==========
+        class AuthManager {
+            constructor() {
+                this.checkAuthentication();
+            }
+
+            checkAuthentication() {
+                const session = this.getValidSession();
+                if (!session) {
+                    this.redirectToLogin();
+                    return false;
+                }
+
+                // 更新用户信息显示
+                this.updateUserDisplay(session);
+                return true;
+            }
+
+            getValidSession() {
+                // 检查 sessionStorage (临时会话)
+                let session = sessionStorage.getItem('adminSession');
+                if (!session) {
+                    // 检查 localStorage (记住登录)
+                    session = localStorage.getItem('adminSession');
+                }
+
+                if (session) {
+                    try {
+                        const sessionData = JSON.parse(session);
+                        if (new Date(sessionData.expiresAt) > new Date()) {
+                            return sessionData;
+                        } else {
+                            // 会话过期，清除
+                            this.clearSession();
+                        }
+                    } catch (error) {
+                        console.error('会话数据解析失败:', error);
+                        this.clearSession();
+                    }
+                }
+
+                return null;
+            }
+
+            updateUserDisplay(session) {
+                const userNameElement = document.getElementById('userName');
+                const userAvatarElement = document.getElementById('userAvatar');
+
+                if (userNameElement) {
+                    userNameElement.textContent = session.displayName || '管理员';
+                }
+
+                if (userAvatarElement) {
+                    userAvatarElement.textContent = (session.displayName || '管理员').charAt(0);
+                }
+            }
+
+            clearSession() {
+                sessionStorage.removeItem('adminSession');
+                localStorage.removeItem('adminSession');
+            }
+
+            redirectToLogin() {
+                window.location.href = '/admin/login';
+            }
+
+            logout() {
+                this.clearSession();
+                if (typeof notificationManager !== 'undefined') {
+                    notificationManager.addNotification('info', '退出登录', '您已安全退出系统');
+                }
+                setTimeout(() => {
+                    this.redirectToLogin();
+                }, 1000);
+            }
+        }
+
+        // 创建认证管理器
+        const authManager = new AuthManager();
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                authManager.logout();
+            }
+        }
+
+        // ========== 客服聊天管理系统 ==========
+        class AdminChatManager {
+            constructor() {
+                this.chatSessions = [];
+                this.currentSession = null;
+                this.autoReplies = [];
+                this.quickReplies = [];
+                this.filteredSessions = [];
+                this.init();
+            }
+
+            init() {
+                this.loadChatSessions();
+                this.loadAutoReplies();
+                this.loadQuickReplies();
+                this.bindEvents();
+                this.startRealTimeUpdates();
+            }
+
+            loadChatSessions() {
+                this.chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                this.filteredSessions = [...this.chatSessions];
+                this.renderSessionsList();
+                this.updateChatNotificationBadge();
+            }
+
+            loadAutoReplies() {
+                this.autoReplies = JSON.parse(localStorage.getItem('chatAutoReplies') || JSON.stringify([
+                    {
+                        id: 1,
+                        keywords: ['课程', '学习', '培训'],
+                        reply: '我们的私域增长闭环实战营是30天系统性课程，包含理论学习+实战指导+1对1陪跑，帮助实体店老板搭建完整的私域增长系统。',
+                        category: 'course',
+                        enabled: true
+                    },
+                    {
+                        id: 2,
+                        keywords: ['价格', '费用', '多少钱', '收费'],
+                        reply: '课程原价2999元，现在限时优惠价2699元！包含30天完整课程、实战工具包、专属社群和1对1指导服务。',
+                        category: 'price',
+                        enabled: true
+                    },
+                    {
+                        id: 3,
+                        keywords: ['报名', '如何参加', '怎么报名'],
+                        reply: '报名很简单！您可以点击页面上的"立即报名"按钮，填写基本信息即可。我们会有专业老师联系您，详细介绍课程安排。',
+                        category: 'enrollment',
+                        enabled: true
+                    }
+                ]));
+                this.renderAutoReplyRules();
+            }
+
+            loadQuickReplies() {
+                this.quickReplies = JSON.parse(localStorage.getItem('chatQuickReplies') || JSON.stringify([
+                    '感谢您的咨询，请问有什么可以帮助您的？',
+                    '我们的课程确实能帮助您解决这个问题',
+                    '您可以添加我们的微信了解详细信息',
+                    '我安排专业老师为您详细介绍',
+                    '请稍等，我为您查询相关信息',
+                    '如果还有其他问题，随时可以咨询我'
+                ]));
+                this.renderQuickReplyTemplates();
+            }
+
+            bindEvents() {
+                // 聊天输入框事件
+                const replyInput = document.getElementById('chatReplyInput');
+                if (replyInput) {
+                    replyInput.addEventListener('input', (e) => {
+                        this.updateReplyCharCounter(e.target.value.length);
+                    });
+
+                    replyInput.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && e.key === 'Enter') {
+                            this.sendReply();
+                        }
+                    });
+                }
+
+                // 发送按钮事件
+                const sendBtn = document.getElementById('sendReplyBtn');
+                if (sendBtn) {
+                    sendBtn.addEventListener('click', () => {
+                        this.sendReply();
+                    });
+                }
+
+                // 监听前台聊天更新
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'chat_update') {
+                        this.handleChatUpdate();
+                    }
+                });
+            }
+
+            startRealTimeUpdates() {
+                // 每30秒检查一次新消息
+                setInterval(() => {
+                    this.loadChatSessions();
+                }, 30000);
+            }
+
+            handleChatUpdate() {
+                // 重新加载聊天会话
+                this.loadChatSessions();
+
+                // 如果当前有选中的会话，刷新消息
+                if (this.currentSession) {
+                    const updatedSession = this.chatSessions.find(s => s.userId === this.currentSession.userId);
+                    if (updatedSession) {
+                        this.currentSession = updatedSession;
+                        this.renderChatMessages();
+                    }
+                }
+
+                // 发送桌面通知
+                if (typeof notificationManager !== 'undefined') {
+                    notificationManager.addNotification('info', '新聊天消息', '收到新的客服聊天消息');
+                }
+            }
+
+            renderSessionsList() {
+                const container = document.getElementById('chatSessionsList');
+                if (!container) return;
+
+                if (this.filteredSessions.length === 0) {
+                    container.innerHTML = `
+                        <div class="p-4 text-center text-gray-500">
+                            <i data-lucide="message-circle-off" class="w-8 h-8 mx-auto mb-2 text-gray-400"></i>
+                            <p>暂无聊天会话</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = this.filteredSessions.map(session => `
+                        <div class="chat-session-item p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors ${this.currentSession?.userId === session.userId ? 'bg-blue-50 border-blue-200' : ''}"
+                             onclick="adminChatManager.selectSession('${session.userId}')">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="text-white font-medium text-sm">${session.userInfo.avatar}</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h4 class="font-medium text-gray-900 truncate">${session.userInfo.name}</h4>
+                                        <span class="text-xs text-gray-500">${this.formatTime(session.lastMessageAt)}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm text-gray-600 truncate">${session.userInfo.shopType}</p>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="status-badge ${this.getSessionStatusClass(session.status)} px-2 py-1 text-xs rounded-full">
+                                                ${this.getSessionStatusText(session.status)}
+                                            </span>
+                                            ${session.unreadCount > 0 ? `<span class="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">${session.unreadCount}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    ${session.messages.length > 0 ? `<p class="text-xs text-gray-500 mt-1 truncate">${session.messages[session.messages.length - 1].content}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                lucide.createIcons();
+            }
+
+            selectSession(userId) {
+                const session = this.chatSessions.find(s => s.userId === userId);
+                if (!session) return;
+
+                this.currentSession = session;
+
+                // 标记消息为已读
+                session.unreadCount = 0;
+                this.saveChatSessions();
+
+                // 显示聊天界面
+                this.showChatInterface();
+                this.renderChatHeader();
+                this.renderChatMessages();
+                this.renderQuickReplyButtons();
+                this.renderSessionsList();
+                this.updateChatNotificationBadge();
+
+                // 异步显示关联信息，确保DOM已渲染
+                setTimeout(() => {
+                    this.showAllLinkedInfo(userId);
+                }, 100);
+            }
+
+            showChatInterface() {
+                document.getElementById('chatDefaultState').classList.add('hidden');
+                document.getElementById('chatHeader').classList.remove('hidden');
+                document.getElementById('chatMessagesArea').classList.remove('hidden');
+                document.getElementById('chatInputArea').classList.remove('hidden');
+            }
+
+            renderChatHeader() {
+                if (!this.currentSession) return;
+
+                const userInfo = this.currentSession.userInfo;
+                document.getElementById('currentChatAvatar').textContent = userInfo.avatar;
+                document.getElementById('currentChatName').textContent = userInfo.name;
+                document.getElementById('currentChatInfo').textContent = `${userInfo.shopType} • ${userInfo.phone}`;
+
+                const statusElement = document.getElementById('currentChatStatus');
+                statusElement.className = `px-2 py-1 text-xs rounded-full ${this.getSessionStatusClass(this.currentSession.status)}`;
+                statusElement.textContent = this.getSessionStatusText(this.currentSession.status);
+            }
+
+            renderChatMessages() {
+                const container = document.getElementById('chatMessagesArea');
+                if (!container || !this.currentSession) return;
+
+                container.innerHTML = this.currentSession.messages.map(message => `
+                    <div class="flex items-start space-x-3 mb-4 ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            message.type === 'user'
+                                ? 'bg-gradient-to-br from-blue-500 to-purple-600'
+                                : 'bg-gradient-to-br from-green-500 to-teal-600'
+                        }">
+                            ${message.type === 'user'
+                                ? `<span class="text-white font-medium text-sm">${this.currentSession.userInfo.avatar}</span>`
+                                : `<i data-lucide="headphones" class="w-4 h-4 text-white"></i>`
+                            }
+                        </div>
+                        <div class="max-w-xs lg:max-w-md">
+                            <div class="px-4 py-2 rounded-lg ${
+                                message.type === 'user'
+                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                                    : 'bg-white border border-gray-200 text-gray-900'
+                            }">
+                                <p class="text-sm">${this.escapeHtml(message.content)}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 ${message.type === 'user' ? 'text-right' : ''}">${this.formatTime(message.timestamp)}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.scrollTop = container.scrollHeight;
+                lucide.createIcons();
+            }
+
+            renderQuickReplyButtons() {
+                const container = document.getElementById('quickReplyButtons');
+                if (!container) return;
+
+                container.innerHTML = this.quickReplies.map(reply => `
+                    <button class="quick-reply-btn px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
+                            onclick="adminChatManager.insertQuickReply('${this.escapeHtml(reply)}')">
+                        ${reply}
+                    </button>
+                `).join('');
+            }
+
+            insertQuickReply(reply) {
+                const input = document.getElementById('chatReplyInput');
+                if (input) {
+                    input.value = reply;
+                    this.updateReplyCharCounter(reply.length);
+                    input.focus();
+                }
+            }
+
+            sendReply() {
+                const input = document.getElementById('chatReplyInput');
+                const message = input.value.trim();
+
+                if (!message || !this.currentSession) return;
+
+                // 添加消息到当前会话
+                const newMessage = {
+                    id: Date.now(),
+                    type: 'agent',
+                    content: message,
+                    timestamp: new Date().toISOString()
+                };
+
+                this.currentSession.messages.push(newMessage);
+                this.currentSession.lastMessageAt = new Date().toISOString();
+
+                // 保存到localStorage
+                this.saveChatSessions();
+
+                // 更新界面
+                this.renderChatMessages();
+                input.value = '';
+                this.updateReplyCharCounter(0);
+
+                // 通知前台页面
+                this.notifyFrontendNewMessage(newMessage);
+
+                // 显示成功提示
+                if (typeof notificationManager !== 'undefined') {
+                    notificationManager.addNotification('success', '消息发送', '回复已发送给用户');
+                }
+            }
+
+            notifyFrontendNewMessage(message) {
+                // 这里可以实现向前台推送消息的逻辑
+                // 目前使用localStorage事件模拟
+                localStorage.setItem('admin_chat_reply', JSON.stringify({
+                    userId: this.currentSession.userId,
+                    message: message,
+                    timestamp: Date.now()
+                }));
+                localStorage.removeItem('admin_chat_reply');
+            }
+
+            updateChatNotificationBadge() {
+                const badge = document.getElementById('chatNotificationBadge');
+                const totalUnread = this.chatSessions.reduce((sum, session) => sum + (session.unreadCount || 0), 0);
+
+                if (badge) {
+                    badge.textContent = totalUnread;
+                    badge.style.display = totalUnread > 0 ? 'flex' : 'none';
+                }
+            }
+
+            saveChatSessions() {
+                localStorage.setItem('chatSessions', JSON.stringify(this.chatSessions));
+            }
+
+            // 从咨询记录打开聊天窗口
+            openChatFromConsultation(userId) {
+                const chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                const session = chatSessions.find(s => s.userId === userId);
+
+                if (!session) {
+                    alert('该用户暂无聊天记录');
+                    return;
+                }
+
+                // 切换到聊天管理页面
+                switchSection('chat');
+
+                // 选中对应的聊天会话
+                setTimeout(() => {
+                    this.selectSession(userId);
+                    this.showLinkedConsultation(userId);
+                }, 300);
+            }
+
+            // 从报名记录打开聊天窗口
+            openChatFromEnrollment(userId) {
+                const chatSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+                const session = chatSessions.find(s => s.userId === userId);
+
+                if (!session) {
+                    alert('该用户暂无聊天记录');
+                    return;
+                }
+
+                // 切换到聊天管理页面
+                switchSection('chat');
+
+                // 选中对应的聊天会话
+                setTimeout(() => {
+                    this.selectSession(userId);
+                    this.showLinkedEnrollment(userId);
+                }, 300);
+            }
+
+            // 显示关联的咨询信息
+            showLinkedConsultation(userId) {
+                // 使用统一的关联信息显示方法
+                this.showAllLinkedInfo(userId);
+            }
+
+            // 显示关联的报名信息
+            showLinkedEnrollment(userId) {
+                // 使用统一的关联信息显示方法
+                this.showAllLinkedInfo(userId);
+            }
+
+            // 通用方法显示关联信息
+            showLinkedInfo(info) {
+                const linkedInfoDiv = document.createElement('div');
+
+                // 为灰色样式做特殊处理
+                const colorClass = info.color === 'gray' ? 'gray' : info.color;
+                const bgColor = info.color === 'gray' ? 'bg-gray-50' : `bg-${info.color}-50`;
+                const borderColor = info.color === 'gray' ? 'border-gray-200' : `border-${info.color}-200`;
+                const iconColor = info.color === 'gray' ? 'text-gray-500' : `text-${info.color}-600`;
+                const titleColor = info.color === 'gray' ? 'text-gray-700' : `text-${info.color}-900`;
+                const descColor = info.color === 'gray' ? 'text-gray-600' : `text-${info.color}-700`;
+                const btnColor = info.color === 'gray' ? 'text-gray-500' : `text-${info.color}-600`;
+                const btnHoverColor = info.color === 'gray' ? 'hover:text-gray-700' : `hover:text-${info.color}-800`;
+
+                linkedInfoDiv.className = `linked-info ${bgColor} border ${borderColor} rounded-lg p-4 mb-4`;
+                linkedInfoDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="${info.icon}" class="w-5 h-5 ${iconColor}"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold ${titleColor}">${info.title}</h4>
+                                <p class="text-xs ${descColor}">${info.description}</p>
+                            </div>
+                        </div>
+                        ${info.onClick !== 'void(0)' ?
+                            `<button onclick="${info.onClick}" class="${btnColor} ${btnHoverColor} text-sm font-medium">
+                                查看详情
+                            </button>` :
+                            '<div></div>'
+                        }
+                    </div>
+                `;
+
+                const messagesArea = document.getElementById('chatMessagesArea');
+                if (messagesArea) {
+                    messagesArea.insertBefore(linkedInfoDiv, messagesArea.firstChild);
+                    lucide.createIcons();
+                }
+            }
+
+            // 自动显示所有关联信息
+            showAllLinkedInfo(userId) {
+                if (!window.dataManager) return;
+
+                const linkedRecords = window.dataManager.getUserLinkedRecords(userId);
+
+                // 先清除之前的关联信息
+                const existingInfos = document.querySelectorAll('.linked-info');
+                existingInfos.forEach(info => info.remove());
+
+                // 显示咨询关联信息
+                if (linkedRecords.consultation) {
+                    const consultation = linkedRecords.consultation;
+                    const description = consultation.content ?
+                        (consultation.content.length > 50 ? consultation.content.substring(0, 50) + '...' : consultation.content) :
+                        `${consultation.shopType} • ${consultation.city || '未填写'}`;
+
+                    this.showLinkedInfo({
+                        type: 'consultation',
+                        data: consultation,
+                        title: '关联咨询记录',
+                        description: description,
+                        icon: 'file-text',
+                        color: 'blue',
+                        onClick: `viewConsultation(${consultation.id})`
+                    });
+                }
+
+                // 显示报名关联信息
+                if (linkedRecords.enrollment) {
+                    const enrollment = linkedRecords.enrollment;
+                    this.showLinkedInfo({
+                        type: 'enrollment',
+                        data: enrollment,
+                        title: '关联报名记录',
+                        description: `微信：${enrollment.wechat} | ${enrollment.shopType}`,
+                        icon: 'user-check',
+                        color: 'green',
+                        onClick: `viewEnrollment(${enrollment.id})`
+                    });
+                }
+
+                // 如果没有关联信息，显示提示
+                if (!linkedRecords.consultation && !linkedRecords.enrollment) {
+                    this.showLinkedInfo({
+                        type: 'info',
+                        data: null,
+                        title: '暂无关联记录',
+                        description: '该用户暂无咨询或报名记录',
+                        icon: 'info',
+                        color: 'gray',
+                        onClick: 'void(0)'
+                    });
+                }
+            }
+
+            updateReplyCharCounter(count) {
+                const counter = document.getElementById('replyCharCounter');
+                if (counter) {
+                    counter.textContent = `${count}/1000`;
+                }
+            }
+
+            formatTime(timestamp) {
+                const now = new Date();
+                const time = new Date(timestamp);
+                const diff = now - time;
+
+                if (diff < 60000) return '刚刚';
+                if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+                return `${Math.floor(diff / 86400000)}天前`;
+            }
+
+            getSessionStatusClass(status) {
+                switch (status) {
+                    case 'active': return 'bg-green-100 text-green-700';
+                    case 'waiting': return 'bg-yellow-100 text-yellow-700';
+                    case 'closed': return 'bg-gray-100 text-gray-700';
+                    default: return 'bg-gray-100 text-gray-700';
+                }
+            }
+
+            getSessionStatusText(status) {
+                switch (status) {
+                    case 'active': return '活跃中';
+                    case 'waiting': return '等待回复';
+                    case 'closed': return '已结束';
+                    default: return '未知';
+                }
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            renderAutoReplyRules() {
+                const container = document.getElementById('autoReplyRules');
+                if (!container) return;
+
+                container.innerHTML = this.autoReplies.map(rule => `
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <input type="checkbox" ${rule.enabled ? 'checked' : ''}
+                                           onchange="adminChatManager.toggleAutoReply(${rule.id})"
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <label class="text-sm font-medium text-gray-900">关键词规则</label>
+                                </div>
+                                <input type="text" value="${rule.keywords.join(', ')}"
+                                       class="w-full text-sm p-2 border border-gray-300 rounded mb-2"
+                                       placeholder="关键词，用逗号分隔"
+                                       onchange="adminChatManager.updateAutoReplyKeywords(${rule.id}, this.value)">
+                                <textarea class="w-full text-sm p-2 border border-gray-300 rounded" rows="3"
+                                          placeholder="自动回复内容"
+                                          onchange="adminChatManager.updateAutoReplyContent(${rule.id}, this.value)">${rule.reply}</textarea>
+                            </div>
+                            <button onclick="adminChatManager.deleteAutoReply(${rule.id})"
+                                    class="ml-3 text-red-600 hover:text-red-800">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+            }
+
+            renderQuickReplyTemplates() {
+                const container = document.getElementById('quickReplyTemplates');
+                if (!container) return;
+
+                container.innerHTML = this.quickReplies.map((reply, index) => `
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" value="${reply}"
+                                   class="flex-1 text-sm p-2 border border-gray-300 rounded"
+                                   onchange="adminChatManager.updateQuickReply(${index}, this.value)">
+                            <button onclick="adminChatManager.deleteQuickReply(${index})"
+                                    class="text-red-600 hover:text-red-800">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+            }
+        }
+
+        // 创建管理端聊天管理器实例
+        const adminChatManager = new AdminChatManager();
+
+        // 客服聊天相关函数
+        function refreshChatSessions() {
+            adminChatManager.loadChatSessions();
+        }
+
+        function filterChatSessions() {
+            const searchTerm = document.getElementById('chatSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('chatStatusFilter').value;
+
+            adminChatManager.filteredSessions = adminChatManager.chatSessions.filter(session => {
+                const matchSearch = !searchTerm ||
+                    session.userInfo.name.toLowerCase().includes(searchTerm) ||
+                    session.userInfo.phone.includes(searchTerm) ||
+                    session.userInfo.shopType.toLowerCase().includes(searchTerm);
+
+                const matchStatus = !statusFilter || session.status === statusFilter;
+
+                return matchSearch && matchStatus;
+            });
+
+            adminChatManager.renderSessionsList();
+        }
+
+        function closeChatSession() {
+            adminChatManager.currentSession = null;
+            document.getElementById('chatDefaultState').classList.remove('hidden');
+            document.getElementById('chatHeader').classList.add('hidden');
+            document.getElementById('chatMessagesArea').classList.add('hidden');
+            document.getElementById('chatInputArea').classList.add('hidden');
+        }
+
+        function addAutoReplyRule() {
+            const newRule = {
+                id: Date.now(),
+                keywords: [],
+                reply: '',
+                category: 'custom',
+                enabled: true
+            };
+            adminChatManager.autoReplies.push(newRule);
+            adminChatManager.renderAutoReplyRules();
+        }
+
+        function addQuickReplyTemplate() {
+            adminChatManager.quickReplies.push('请输入快捷回复内容...');
+            adminChatManager.renderQuickReplyTemplates();
+        }
+
+        function saveChatSettings() {
+            localStorage.setItem('chatAutoReplies', JSON.stringify(adminChatManager.autoReplies));
+            localStorage.setItem('chatQuickReplies', JSON.stringify(adminChatManager.quickReplies));
+
+            if (typeof notificationManager !== 'undefined') {
+                notificationManager.addNotification('success', '设置保存', '客服聊天设置已保存');
+            }
+        }
+
+        function resetChatSettings() {
+            if (confirm('确定要重置聊天设置为默认值吗？')) {
+                localStorage.removeItem('chatAutoReplies');
+                localStorage.removeItem('chatQuickReplies');
+                adminChatManager.loadAutoReplies();
+                adminChatManager.loadQuickReplies();
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 等待数据管理器初始化
+            setTimeout(() => {
+                refreshData();
+                updateDashboardStats();
+
+                // 初始化图表
+                createCharts();
+
+                // 加载内容设置和系统设置
+                loadContentSettings();
+                loadSystemSettings();
+                renderTestimonials();
+                renderSuccessVideos();
+
+                // 如果当前在咨询管理页面，渲染表格
+                if (document.getElementById('consultations').classList.contains('active')) {
+                    renderConsultationTable();
+                }
+
+                // 如果当前在报名管理页面，渲染表格
+                if (document.getElementById('enrollments').classList.contains('active')) {
+                    renderEnrollmentTable();
+                }
+
+                // 初始化通知系统
+                notificationManager.addNotification('success', '系统启动', '管理后台系统启动完成');
+            }, 100);
+        });
+    </script>
+</body>
+</html>
